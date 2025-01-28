@@ -5,7 +5,6 @@ import java.util.Scanner;
 public class TumblrApiHandler {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-
         try {
             System.out.print("Enter the Tumblr blog name: ");
             String blogName = scanner.nextLine();
@@ -16,7 +15,7 @@ public class TumblrApiHandler {
             int start = Integer.parseInt(range.split("-")[0].trim());
             int end = Integer.parseInt(range.split("-")[1].trim());
 
-            TumblrApiService.fetchTumblrData(blogName, start, end); // Call the service method
+            TumblrApiService.fetchTumblrData(blogName, start, end); 
 
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());

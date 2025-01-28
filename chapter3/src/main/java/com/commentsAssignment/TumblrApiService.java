@@ -8,10 +8,9 @@ import java.net.URL;
 public class TumblrApiService {
 
     public static void fetchTumblrData(String blogName, int start, int end) {
-        int apiStart = start - 1; // Convert start to zero-based indexing
+        int apiStart = start - 1;
         int numPosts = end - apiStart + 1;
 
-        // Construct the API URL
         String apiUrl = "https://" + blogName + ".tumblr.com/api/read/json?type=photo&num=" + numPosts + "&start=" + apiStart;
 
         try {
@@ -31,7 +30,6 @@ public class TumblrApiService {
                     .replace("var tumblr_api_read = ", "")
                     .replaceAll(";$", ""); // Clean the JSON response
 
-            // Parse and display the blog information and image URLs
             TumblrApiParser.parseBlogInfo(jsonText);
             TumblrApiParser.parseImageUrls(jsonText, start, end);
 
