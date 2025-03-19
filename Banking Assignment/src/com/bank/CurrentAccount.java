@@ -1,7 +1,6 @@
 package com.bank;
 
-
-class CurrentAccount extends Account {
+public class CurrentAccount extends Account {
     private final double withdrawalLimit = 2500;
 
     public CurrentAccount(double initialBalance) {
@@ -10,16 +9,10 @@ class CurrentAccount extends Account {
 
     @Override
     public boolean withdraw(double amount) {
-        if (amount > withdrawalLimit) {
-            System.out.println("CurrentAccount: Withdrawal amount exceeds limit of " + withdrawalLimit);
-            return false;
-        }
-        if (amount > balance) {
-            System.out.println("CurrentAccount: Insufficient funds.");
+        if (amount > withdrawalLimit || amount > balance) {
             return false;
         }
         balance -= amount;
-        System.out.println("CurrentAccount: Withdrawn " + amount + ", New Balance: " + balance);
         return true;
     }
 }
