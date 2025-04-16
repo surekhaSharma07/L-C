@@ -1,0 +1,6 @@
+
+Employee is an object, because it is an instance of a class (Employee), which follows object-oriented programming (OOP) principles.
+
+A class encapsulates data and behavior (methods).
+
+When we create an instance (Employee employee;), Employee has both state (data) and behavior (methods like getName(), setSalary(), etc.).
