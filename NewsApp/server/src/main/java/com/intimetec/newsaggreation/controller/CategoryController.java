@@ -16,32 +16,42 @@ public class CategoryController {
         this.svc = svc;
     }
 
-    /** GET /api/categories */
+    /**
+     * GET /api/categories
+     */
     @GetMapping
     public List<Category> all() {
         return svc.findAll();
     }
 
-    /** GET /api/categories/{id} */
+    /**
+     * GET /api/categories/{id}
+     */
     @GetMapping("/{id}")
     public Category one(@PathVariable Integer id) {
         return svc.findById(id);
     }
 
-    /** POST /api/categories */
+    /**
+     * POST /api/categories
+     */
     @PostMapping
     public Category create(@RequestBody Category cat) {
         return svc.create(cat);
     }
 
-    /** PUT /api/categories/{id} */
+    /**
+     * PUT /api/categories/{id}
+     */
     @PutMapping("/{id}")
     public Category update(@PathVariable Integer id,
                            @RequestBody Category cat) {
         return svc.update(id, cat);
     }
 
-    /** DELETE /api/categories/{id} */
+    /**
+     * DELETE /api/categories/{id}
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable Integer id) {
         svc.delete(id);
