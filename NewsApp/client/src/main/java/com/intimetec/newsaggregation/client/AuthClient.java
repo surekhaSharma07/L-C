@@ -13,6 +13,7 @@ public class AuthClient {
     private final HttpClient http;
     private final ObjectMapper mapper;
     private String jwtToken;
+    private String role;          // ← NEW
 
     public AuthClient(ObjectMapper mapper) {
         this.mapper = mapper;
@@ -47,16 +48,26 @@ public class AuthClient {
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(json))
                 .build();
-        var resp = http.send(req, HttpResponse.BodyHandlers.ofString());
+
+        HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString());
         if (resp.statusCode() == 200) {
             JsonNode root = mapper.readTree(resp.body());
             this.jwtToken = root.path("token").asText(null);
-            return this.jwtToken != null;
+            this.role = root.path("role").asText(null);  // ← grab role from server JSON
+            return jwtToken != null;
         }
         return false;
     }
 
+
+
     public String getJwtToken() {
         return jwtToken;
     }
+
+    public String getRole() {
+        return role;
+    }
+
+
 }

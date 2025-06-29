@@ -2,6 +2,8 @@ package com.intimetec.newsaggregation.app;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.intimetec.newsaggregation.client.AdminClient;
+import com.intimetec.newsaggregation.client.AdminClient.ApiSourceDto;
 import com.intimetec.newsaggregation.client.AuthClient;
 import com.intimetec.newsaggregation.client.NewsClient;
 
@@ -11,12 +13,21 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Scanner;
 
+/**
+ * Console UI for News Aggregator with admin capabilities.
+ */
 public class ConsoleMenu {
+
+    private static final String BASE_URL = "http://localhost:8081"; // server port for admin APIs
+
     private final Scanner sc = new Scanner(System.in);
-    private final AuthClient auth;
-    private final NewsClient news;
     private final DateTimeFormatter dateFmt = DateTimeFormatter.ofPattern("dd-MMM-yyyy");
     private final DateTimeFormatter timeFmt = DateTimeFormatter.ofPattern("hh:mm a");
+
+    private final AuthClient auth;
+    private final NewsClient news;
+
+    private String jwt;      // JWT token after login
 
     public ConsoleMenu() {
         ObjectMapper mapper = new ObjectMapper();
@@ -24,32 +35,128 @@ public class ConsoleMenu {
         this.news = new NewsClient(mapper, auth);
     }
 
+    /* ------------------ ENTRY ------------------ */
     public void start() throws Exception {
         while (true) {
-            System.out.println("""
-                1. Login
-                2. Sign up
-                3. Exit
-                >\s""");
+            System.out.println("\n1. Login\n2. Sign up\n3. Exit\n> ");
             String choice = sc.nextLine().trim();
-            if ("1".equals(choice) && handleLogin()) break;
-            if ("2".equals(choice)) handleSignup();
-            if ("3".equals(choice)) return;
-            if (!"1".equals(choice) && !"2".equals(choice)) {
-                System.out.println("Invalid choice");
+            switch (choice) {
+                case "1" -> {
+                    if (handleLogin()) {
+                        if ("ADMIN".equalsIgnoreCase(auth.getRole())) {
+                            adminMenu();
+                        } else {
+                            userMenu();
+                        }
+                    }
+                }
+                case "2" -> handleSignup();
+                case "3" -> {
+                    return;
+                }
+                default -> System.out.println("Invalid choice");
             }
         }
+    }
 
-        // — Main menu —
+    /* ------------- AUTH ------------- */
+    private boolean handleLogin() throws Exception {
+        System.out.print("Email    : ");
+        String email = sc.nextLine().trim();
+        System.out.print("Password : ");
+        String pwd = sc.nextLine().trim();
+
+        boolean ok = auth.login(email, pwd);
+        if (!ok) {
+            System.out.println("Login failed");
+            return false;
+        }
+        this.jwt = auth.getJwtToken();
+        System.out.println("Login successful" + ("ADMIN".equalsIgnoreCase(auth.getRole()) ? " (ADMIN)" : ""));
+        return true;
+    }
+
+    private void handleSignup() throws Exception {
+        System.out.print("Email    : ");
+        String email = sc.nextLine().trim();
+        System.out.print("Password : ");
+        String pwd = sc.nextLine().trim();
+        boolean ok = auth.signup(email, pwd);
+        System.out.println(ok ? "Signup successful" : "Signup failed");
+    }
+
+    /* ------------- ADMIN MENU ------------- */
+    private void adminMenu() throws Exception {
+        AdminClient admin = new AdminClient(BASE_URL, jwt);
         while (true) {
-            System.out.printf("%nWelcome to the News Application! Date: %s  Time: %s%n",
-                    LocalDate.now().format(dateFmt),
-                    LocalTime.now().format(timeFmt)
-            );
             System.out.println("""
-                1. Headlines
-                2. Logout
-                >\s""");
+                    \nAdmin Options
+                    1. View external servers & status
+                    2. View external server details
+                    3. Add / Edit external server
+                    4. Add new News Category
+                    5. Logout
+                    > """);
+            switch (sc.nextLine().trim()) {
+                case "1" -> {
+                    ApiSourceDto[] list = admin.listApiSources();
+                    System.out.println("\n--- External Servers ---");
+                    for (ApiSourceDto s : list) {
+                        System.out.printf("[%d] %-18s %s%n", s.getId(), s.getName(), s.getStatus());
+                    }
+                }
+                case "2" -> {
+                    System.out.print("Server id: ");
+                    int id = Integer.parseInt(sc.nextLine().trim());
+                    try {
+                        ApiSourceDto d = admin.getApiSource(id);
+                        if (d == null || d.getId() == null) {
+                            System.out.println("No server found with ID " + id);
+                        } else {
+                            System.out.printf("\nId: %d\nName: %s\nEndpoint: %s\nAPI Key: %s\nPolling: %d\nStatus: %s\n",
+                                    d.getId(), d.getName(), d.getEndpointUrl(), d.getApiKey(), d.getPollingFreq(), d.getStatus());
+                        }
+                    } catch (Exception ex) {
+                        System.out.println("Error fetching server details: " + ex.getMessage());
+                    }
+                }
+                case "3" -> {
+                    ApiSourceDto dto = new ApiSourceDto();
+                    System.out.print("Id (blank=new): ");
+                    String idTxt = sc.nextLine().trim();
+                    if (!idTxt.isBlank()) dto.setId(Integer.parseInt(idTxt));
+                    System.out.print("Name        : ");
+                    dto.setName(sc.nextLine().trim());
+                    System.out.print("Endpoint URL: ");
+                    dto.setEndpointUrl(sc.nextLine().trim());
+                    System.out.print("API Key     : ");
+                    dto.setApiKey(sc.nextLine().trim());
+                    System.out.print("Polling freq: ");
+                    String freq = sc.nextLine().trim();
+                    if (!freq.isBlank()) dto.setPollingFreq(Integer.parseInt(freq));
+                    System.out.println("Saved => " + admin.saveApiSource(dto));
+                }
+                case "4" -> {
+                    System.out.print("New category name: ");
+                    String name = sc.nextLine().trim();
+                    System.out.println("Category added: " + admin.addCategory(name));
+                }
+                case "5" -> {
+                    System.out.println("Logged out.");
+                    return;
+                }
+                default -> System.out.println("Invalid option");
+            }
+        }
+    }
+
+    /* ------------- USER MENU ------------- */
+    private void userMenu() throws Exception {
+        while (true) {
+            System.out.printf("%nWelcome! Date: %s  Time: %s%n",
+                    LocalDate.now().format(dateFmt),
+                    LocalTime.now().format(timeFmt));
+            System.out.println("1. Headlines\n2. Logout\n> ");
             String c = sc.nextLine().trim();
             if ("1".equals(c)) {
                 headlinesMenu();
@@ -62,34 +169,10 @@ public class ConsoleMenu {
         }
     }
 
-    private boolean handleLogin() throws Exception {
-        System.out.print("Email: ");
-        String email = sc.nextLine().trim();
-        System.out.print("Password: ");
-        String pwd = sc.nextLine().trim();
-        boolean ok = auth.login(email, pwd);
-        System.out.println(ok ? "Login successful" : "Login failed");
-        return ok;
-    }
-
-    private void handleSignup() throws Exception {
-        System.out.print("Email: ");
-        String email = sc.nextLine().trim();
-        System.out.print("Password: ");
-        String pwd = sc.nextLine().trim();
-        boolean ok = auth.signup(email, pwd);
-        System.out.println(ok ? "Signup successful" : "Signup failed");
-    }
-
+    /* ----------- Headlines helpers ----------- */
     private void headlinesMenu() throws Exception {
         while (true) {
-            System.out.println("""
-                
-                Headlines Menu:
-                1. Today
-                2. Date range
-                3. Back
-                >\s""");
+            System.out.println("\nHeadlines Menu:\n1. Today\n2. Date range\n3. Back\n> ");
             String ch = sc.nextLine().trim();
             if ("1".equals(ch)) {
                 displayByDate(LocalDate.now());
@@ -119,19 +202,9 @@ public class ConsoleMenu {
 
     private void categoryFilter(LocalDate date, List<JsonNode> articles) throws Exception {
         while (true) {
-            System.out.println("""
-                
-                Filter by category:
-                1. All
-                2. Business
-                3. Entertainment
-                4. Sports
-                5. Technology
-                6. Back
-                >\s""");
+            System.out.println("\nFilter by category:\n1. All\n2. Business\n3. Entertainment\n4. Sports\n5. Technology\n6. Back\n> ");
             String choice = sc.nextLine().trim();
             String cat;
-
             switch (choice) {
                 case "1" -> cat = null;
                 case "2" -> cat = "business";
@@ -146,21 +219,13 @@ public class ConsoleMenu {
                     continue;
                 }
             }
-
-            List<JsonNode> filtered = (cat == null)
-                    ? articles
-                    : news.fetchByDateAndCategory(date, cat);
-
-            System.out.println("\n--- HEADLINES ---");
-            for (int i = 0; i < filtered.size(); i++) {
-                JsonNode a = filtered.get(i);
-                System.out.printf(
-                        "%2d. %s%n   %s%n   URL: %s%n%n",
-                        i + 1,
+            List<JsonNode> filtered = (cat == null) ? articles : news.fetchByDateAndCategory(date, cat);
+            for (JsonNode a : filtered) {
+                System.out.printf("\n[%s]\n%s\n%s\n%s\n",
+                        a.path("category").asText("General"),
                         a.path("title").asText(),
-                        a.path("description").asText(""),
-                        a.path("url").asText("")
-                );
+                        a.path("source").asText(),
+                        a.path("publishedAt").asText());
             }
         }
     }
@@ -169,3 +234,8 @@ public class ConsoleMenu {
         new ConsoleMenu().start();
     }
 }
+
+
+
+
+

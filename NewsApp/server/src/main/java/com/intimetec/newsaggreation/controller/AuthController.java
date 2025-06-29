@@ -30,8 +30,17 @@ public class AuthController {
     @PostMapping("/signup")
     public ResponseEntity<AuthResponse> signup(@RequestBody AuthRequest req) {
         User user = userService.register(req.getEmail(), req.getPassword());
-        String token = jwtUtil.generateToken(user.getEmail());
-        return ResponseEntity.ok(new AuthResponse(user.getId(), user.getEmail(), token));
+
+        /* 1️⃣  Get the role name here */
+        String roleName = user.getRole().getName();   // "ADMIN" or "USER"
+
+        /* 2️⃣  Generate a token that also carries the role (optional but useful) */
+        String token = jwtUtil.generateToken(user.getEmail(), roleName);  // ← use the 2‑arg overload
+
+        /* 3️⃣  Return it in AuthResponse so the client can read it */
+        return ResponseEntity.ok(
+                new AuthResponse(user.getId(), user.getEmail(), token, roleName)
+        );
     }
 
     @PostMapping("/login")
@@ -40,8 +49,19 @@ public class AuthController {
         if (!encoder.matches(req.getPassword(), user.getPasswordHash())) {
             throw new BadCredentialsException("Invalid credential");
         }
-        String token = jwtUtil.generateToken(user.getEmail());
-        return ResponseEntity.ok(new AuthResponse(user.getId(), user.getEmail(), token));
+
+        /* 1️⃣  Same role extraction */
+        String roleName = user.getRole().getName();
+
+        /* 2️⃣  Token with role (optional) */
+        String token = jwtUtil.generateToken(user.getEmail(), roleName);
+
+        /* 3️⃣  Include role in the response */
+        return ResponseEntity.ok(
+                new AuthResponse(user.getId(), user.getEmail(), token, roleName)
+        );
     }
+
+
 }
 
