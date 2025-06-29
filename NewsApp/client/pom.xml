@@ -29,7 +29,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.28</version>
+            <version>1.18.30</version>
         </dependency>
 
         <!-- ModelMapper -->
@@ -52,7 +52,5 @@
             <version>2.19.0</version>
             <scope>compile</scope>
         </dependency>
-
-
     </dependencies>
 </project>

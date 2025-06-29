@@ -23,6 +23,16 @@ public class JwtUtil {
                 .signWith(getKey(), SignatureAlgorithm.HS256).compact();
     }
 
+    public String generateToken(String username, String role) {
+        return Jwts.builder()
+                .setSubject(username)
+                .claim("role", role)                          // NEW claim
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + 86_400_000))
+                .signWith(getKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
     public String extractUsername(String token) {
         return Jwts.parserBuilder().setSigningKey(getKey()).build()
                 .parseClaimsJws(token).getBody().getSubject();
