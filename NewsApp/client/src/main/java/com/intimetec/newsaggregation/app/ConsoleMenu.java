@@ -200,11 +200,22 @@ public class ConsoleMenu {
         categoryFilter(from, list);
     }
 
+
     private void categoryFilter(LocalDate date, List<JsonNode> articles) throws Exception {
         while (true) {
-            System.out.println("\nFilter by category:\n1. All\n2. Business\n3. Entertainment\n4. Sports\n5. Technology\n6. Back\n> ");
+            System.out.println("""
+                    
+                    Filter by category:
+                    1. All
+                    2. Business
+                    3. Entertainment
+                    4. Sports
+                    5. Technology
+                    6. Back
+                    >\s""");
             String choice = sc.nextLine().trim();
             String cat;
+
             switch (choice) {
                 case "1" -> cat = null;
                 case "2" -> cat = "business";
@@ -219,13 +230,21 @@ public class ConsoleMenu {
                     continue;
                 }
             }
-            List<JsonNode> filtered = (cat == null) ? articles : news.fetchByDateAndCategory(date, cat);
-            for (JsonNode a : filtered) {
-                System.out.printf("\n[%s]\n%s\n%s\n%s\n",
-                        a.path("category").asText("General"),
+
+            List<JsonNode> filtered = (cat == null)
+                    ? articles
+                    : news.fetchByDateAndCategory(date, cat);
+
+            System.out.println("\n--- HEADLINES ---");
+            for (int i = 0; i < filtered.size(); i++) {
+                JsonNode a = filtered.get(i);
+                System.out.printf(
+                        "%2d. %s%n   %s%n   URL: %s%n%n",
+                        i + 1,
                         a.path("title").asText(),
-                        a.path("source").asText(),
-                        a.path("publishedAt").asText());
+                        a.path("description").asText(""),
+                        a.path("url").asText("")
+                );
             }
         }
     }
