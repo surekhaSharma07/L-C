@@ -36,7 +36,7 @@ public class AdminClient {
 
     /* ---------- 4. add category ---------- */
     public Map<?, ?> addCategory(String name) {
-        return exchange("/api/admin/categories", HttpMethod.POST,
+        return exchange("/api/categories/admin", HttpMethod.POST,
                 Map.of("name", name), Map.class);
     }
 
@@ -51,14 +51,15 @@ public class AdminClient {
         return resp.getBody();
     }
 
-    /* ====== DTO used only on client side ====== */
-    @Data @NoArgsConstructor @AllArgsConstructor
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class ApiSourceDto {
         private Integer id;
         private String name;
         private String endpointUrl;
         private String apiKey;
         private Integer pollingFreq;
-        private String status;   // UP / DOWN
+        private String status;
     }
 }
