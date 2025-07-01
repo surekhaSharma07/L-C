@@ -18,6 +18,8 @@ public class Keyword {
     @ManyToMany(mappedBy = "keywords")
     private Set<Article> taggedNews = new HashSet<>();
 
+    @ManyToMany(mappedBy = "keywords")
+    private Set<NotificationConfig> configs = new HashSet<>();
 
     public Keyword() {
     }
