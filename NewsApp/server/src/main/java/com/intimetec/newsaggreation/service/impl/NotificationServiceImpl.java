@@ -52,13 +52,10 @@ package com.intimetec.newsaggreation.service.impl;
 
 import com.intimetec.newsaggreation.dto.KeywordDto;
 import com.intimetec.newsaggreation.dto.NotificationConfigDto;
+import com.intimetec.newsaggreation.dto.NotificationDto;
 import com.intimetec.newsaggreation.mapper.NotificationMapper;
-import com.intimetec.newsaggreation.model.Keyword;
-import com.intimetec.newsaggreation.model.NotificationConfig;
-import com.intimetec.newsaggreation.model.User;
-import com.intimetec.newsaggreation.repository.KeywordRepository;
-import com.intimetec.newsaggreation.repository.NotificationConfigRepository;
-import com.intimetec.newsaggreation.repository.UserRepository;
+import com.intimetec.newsaggreation.model.*;
+import com.intimetec.newsaggreation.repository.*;
 import com.intimetec.newsaggreation.service.NotificationService;   // ← your interface
 import com.intimetec.newsaggreation.util.NotificationConfigFactory;
 import jakarta.transaction.Transactional;
@@ -68,6 +65,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -75,7 +73,8 @@ public class NotificationServiceImpl implements NotificationService {
 
     private static final Logger log = LoggerFactory.getLogger(NotificationServiceImpl.class);
 //
-//    private final UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final NotificationRepository notificationRepository;
 //    private final NotificationConfigRepository configRepo;
 //    private final KeywordRepository keywordRepo;
 //
@@ -122,4 +121,34 @@ public class NotificationServiceImpl implements NotificationService {
 //    private NotificationConfig createAndSaveDefaultConfig(User user) {
 //        return configRepo.save(NotificationConfigFactory.createDefault(user));
 //    }
-}
+
+
+        private final ArticleRepository articleRepository;   // ⬅ add this
+
+        @Override
+        public List<NotificationDto> findByUserEmail(String email) {
+
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            // adjust the method name to the actual field in Notification (sentAt / createdAt)
+            List<Notification> list = notificationRepository.findByUserOrderBySentAtDesc(user);
+
+            return list.stream()
+                    .map(n -> {
+                        // fetch the referenced article
+                        Article art = articleRepository.findById(n.getNewsId())
+                                .orElse(null);
+
+                        return new NotificationDto(
+                                n.getId(),
+                                n.getType(),
+                                art != null ? art.getTitle() : "(article deleted)",
+                                art != null ? art.getUrl()   : "",
+                                n.getSentAt().toString()
+                        );
+                    })
+                    .toList();
+        }
+    }
+

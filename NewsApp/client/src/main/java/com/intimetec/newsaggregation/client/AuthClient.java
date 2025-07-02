@@ -59,8 +59,6 @@ public class AuthClient {
         return false;
     }
 
-
-
     public String getJwtToken() {
         return jwtToken;
     }
