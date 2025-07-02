@@ -17,6 +17,8 @@ import java.security.Principal;
  * (category toggles + keyword list).
  * <p>
  * All routes require ROLE_USER.
+ *
+ *
  */
 @RestController
 @RequestMapping("/api/notify/prefs")
@@ -55,16 +57,6 @@ public class NotificationConfigController {
 
 
 
-
-//    @PutMapping
-//    public NotificationConfigDto updatePrefs(@AuthenticationPrincipal UserDetails principal,
-//                                             @RequestBody NotificationConfigDto dto) {
-//        Long userId = userRepo.findByEmail(principal.getUsername())
-//                .orElseThrow(() -> new RuntimeException("User not found"))
-//                .getId();
-//        service.updateConfig(userId, dto);
-//        return service.getCurrentUserConfig(userId);
-//    }
 
 
 }
