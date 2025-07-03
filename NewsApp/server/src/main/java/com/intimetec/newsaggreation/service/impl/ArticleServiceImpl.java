@@ -76,4 +76,12 @@ public class ArticleServiceImpl implements ArticleService {
         return repo.findById(id)
                 .orElseThrow(() -> new RuntimeException("News not found: " + id));
     }
-}
+
+        @Override
+        public List<Article> search(String query) {
+            // same arg twice because the repository method matches title *or* description
+            return repo.findByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(query, query);
+        }
+    }
+
+

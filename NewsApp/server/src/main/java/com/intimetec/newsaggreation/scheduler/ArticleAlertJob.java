@@ -217,7 +217,7 @@ public class ArticleAlertJob {
     /* ───────────────────────── Scheduler ───────────────────────── */
 
     @Transactional
-    @Scheduled(fixedRate = 600000_000)          // every minute
+    @Scheduled(fixedRate = 600000_000)
     public void scan() {
         log.info("Starting Article Alert Job…");
 
@@ -259,7 +259,7 @@ public class ArticleAlertJob {
 
         for (Article art : recent) {
 
-            if (notifyRepo.existsByUserAndNewsId(user, art.getId())) continue;   // already alerted
+            if (notifyRepo.existsByUserAndNewsId(user, art.getId())) continue;
 
             String cat = art.getPrimaryCategory() != null
                     ? art.getPrimaryCategory().getName().toLowerCase()

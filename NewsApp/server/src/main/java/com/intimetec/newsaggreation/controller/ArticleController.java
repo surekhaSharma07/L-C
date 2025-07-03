@@ -3,6 +3,9 @@ package com.intimetec.newsaggreation.controller;
 import com.intimetec.newsaggreation.dto.ArticleResponse;
 import com.intimetec.newsaggreation.service.ArticleService;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -66,4 +69,19 @@ public class ArticleController {
     public ArticleResponse byId(@PathVariable Long id) {
         return ArticleResponse.from(service.findById(id));
     }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<ArticleResponse>> searchArticles(
+            @RequestParam("query") String query,
+            @AuthenticationPrincipal UserDetails principal) {
+
+        List<ArticleResponse> result = service.search(query)
+                .stream()
+                .map(ArticleResponse::from)
+                .toList();
+
+        return ResponseEntity.ok(result);
+    }
+
+
 }

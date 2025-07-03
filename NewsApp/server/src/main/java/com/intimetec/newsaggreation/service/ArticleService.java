@@ -25,4 +25,5 @@ public interface ArticleService {
     List<Article> findByDateRangeAndCategory(LocalDate from, LocalDate to, String category);
 
     List<Article> findByDateRange(LocalDate from, LocalDate to);
+    List<Article> search(String query);
 }
