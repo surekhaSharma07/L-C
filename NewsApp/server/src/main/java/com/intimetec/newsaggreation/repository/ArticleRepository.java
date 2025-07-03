@@ -40,6 +40,10 @@ ArticleRepository extends JpaRepository<Article, Long> {
             String categoryName
     );
 
+    List<Article> findByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
+            String titlePart, String descriptionPart
+    );
+
     List<Article> findAllByPublishedAtBetweenAndCategories_Name(
             LocalDateTime start,
             LocalDateTime end,
