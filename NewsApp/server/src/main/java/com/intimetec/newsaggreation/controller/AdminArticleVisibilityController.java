@@ -1,4 +1,3 @@
-// src/main/java/com/intimetec/newsaggreation/controller/AdminArticleModerationController.java
 package com.intimetec.newsaggreation.controller;
 
 import com.intimetec.newsaggreation.dto.ReportDto;

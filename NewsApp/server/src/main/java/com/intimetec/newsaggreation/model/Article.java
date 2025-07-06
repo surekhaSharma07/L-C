@@ -1,61 +1,3 @@
-//package com.intimetec.newsaggreation.model;
-//
-//import jakarta.persistence.*;
-//import lombok.*;
-//
-//import java.time.LocalDateTime;
-//import java.util.HashSet;
-//import java.util.List;
-//import java.util.Set;
-//
-//@Data
-//@NoArgsConstructor
-//@AllArgsConstructor
-//@Entity
-//@Table(name = "news")
-//public class Article {
-//
-//    @Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
-//    private Long id;
-//
-//    private String title;
-//
-//    @Column(length = 2000)
-//    private String description;
-//
-//    private String url;
-//
-//    private LocalDateTime publishedAt;
-//
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "category_id")
-//    private Category primaryCategory;
-//
-//    @ManyToMany
-//    @JoinTable(
-//            name = "news_category",
-//            joinColumns = @JoinColumn(name = "news_id"),
-//            inverseJoinColumns = @JoinColumn(name = "category_id")
-//    )
-//    private Set<Category> categories = new HashSet<>();
-//
-//    @OneToMany(mappedBy = "news", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private List<SavedArticle> savedBy;
-//
-//    @OneToMany(mappedBy = "news", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private List<Like> likedBy;
-//
-//    @ManyToMany
-//    @JoinTable(
-//            name = "news_keyword",
-//            joinColumns = @JoinColumn(name = "news_id"),
-//            inverseJoinColumns = @JoinColumn(name = "keyword_id")
-//    )
-//    private Set<Keyword> keywords;
-//}
-// src/main/java/com/intimetec/newsaggreation/model/Article.java
-
 package com.intimetec.newsaggreation.model;
 
 import jakarta.persistence.*;
@@ -65,8 +7,6 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-//
-
 
 @Data
 @NoArgsConstructor
@@ -89,11 +29,15 @@ public class Article {
     private LocalDateTime publishedAt;
 
     /* ---------- NEW MODERATION FIELDS ---------- */
-    /** true = hidden from all public endpoints */
+    /**
+     * true = hidden from all public endpoints
+     */
     @Column(nullable = false)
     private boolean hidden = false;
 
-    /** total reports so far (admin can see this) */
+    /**
+     * total reports so far (admin can see this)
+     */
     @Column(nullable = false)
     private int reportCount = 0;
     /* ------------------------------------------- */

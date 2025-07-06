@@ -61,7 +61,6 @@ public class NotificationConfigServiceImpl implements NotificationConfigService 
         cfg.setSports(dto.sports());
         cfg.setTechnology(dto.technology());
 
-        // replace keywords
         cfg.getKeywords().clear();
         for (KeywordDto kd : dto.keywords()) {
             Keyword k = keywordRepo
@@ -73,9 +72,5 @@ public class NotificationConfigServiceImpl implements NotificationConfigService 
                     });
             cfg.getKeywords().add(k);
         }
-
-
     }
-
-
 }

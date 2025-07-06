@@ -40,7 +40,7 @@ public class ArticleController {
     @GetMapping(params = {"from", "to"})
     public List<ArticleResponse> byDateRange(
             @RequestParam(name = "from") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
-            @RequestParam(name = "to")   @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to
+            @RequestParam(name = "to") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to
     ) {
         return service.findByDateRange(from, to).stream()
                 .map(ArticleResponse::from)
@@ -50,7 +50,7 @@ public class ArticleController {
     @GetMapping(params = {"from", "to", "category"})
     public List<ArticleResponse> byDateRangeAndCategory(
             @RequestParam(name = "from") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
-            @RequestParam(name = "to")   @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+            @RequestParam(name = "to") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
             @RequestParam(name = "category") String category
     ) {
         return service.findByDateRangeAndCategory(from, to, category).stream()
@@ -82,6 +82,4 @@ public class ArticleController {
 
         return ResponseEntity.ok(result);
     }
-
-
 }

@@ -1,4 +1,3 @@
-// src/main/java/com/intimetec/newsaggreation/model/Report.java
 package com.intimetec.newsaggreation.model;
 
 import jakarta.persistence.*;

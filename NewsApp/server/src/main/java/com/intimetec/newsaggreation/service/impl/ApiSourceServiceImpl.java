@@ -49,13 +49,11 @@ public class ApiSourceServiceImpl implements ApiSourceService {
         return toDtoWithStatus(saved);
     }
 
-    /* ---------- helpers ---------- */
     private ApiSourceDto toDtoWithStatus(ApiSource e) {
         ApiSourceDto d = new ApiSourceDto();
         BeanUtils.copyProperties(e, d);
         try {
             restTemplate.getForEntity(e.getEndpointUrl(), String.class);
-//            restTemplate.headForHeaders(e.getEndpointUrl());
             d.setStatus("UP");
         } catch (RestClientException ex) {
             d.setStatus("DOWN");
