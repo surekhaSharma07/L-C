@@ -5,10 +5,8 @@ import com.intimetec.newsaggreation.dto.AuthResponse;
 import com.intimetec.newsaggreation.model.User;
 import com.intimetec.newsaggreation.service.UserService;
 import com.intimetec.newsaggreation.config.JwtUtil;
-import org.apache.coyote.BadRequestException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.*;
-import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 

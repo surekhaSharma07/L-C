@@ -1,4 +1,3 @@
-// src/main/java/com/intimetec/newsaggreation/dto/NotificationDto.java
 package com.intimetec.newsaggreation.dto;
 
 public record NotificationDto(

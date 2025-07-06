@@ -1,4 +1,3 @@
-// File: com.intimetec.newsaggreation.util.NotificationConfigFactory.java
 package com.intimetec.newsaggreation.util;
 
 import com.intimetec.newsaggreation.model.NotificationConfig;

@@ -1,6 +1,5 @@
 package com.intimetec.newsaggreation.model;
 
-
 import jakarta.persistence.*;
 import lombok.*;
 
