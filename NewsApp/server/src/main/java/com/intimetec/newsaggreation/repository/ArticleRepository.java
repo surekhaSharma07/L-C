@@ -50,6 +50,8 @@ ArticleRepository extends JpaRepository<Article, Long> {
             String categoryName
     );
 
+    /* ➕ NEW — used by ModerationService to hide/unhide entire category */
+    List<Article> findByPrimaryCategory_Id(Integer categoryId);
 
     /**
      * Fetch recent articles together with their primaryCategory to avoid lazy‑init errors

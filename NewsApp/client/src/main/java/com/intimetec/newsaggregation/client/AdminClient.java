@@ -15,17 +15,14 @@ public class AdminClient {
     private final String jwt;
     private final RestTemplate rest = new RestTemplate();
 
-    /* ---------- 1. list external servers ---------- */
     public ApiSourceDto[] listApiSources() {
         return exchange("/api/admin/apisources", HttpMethod.GET, null, ApiSourceDto[].class);
     }
 
-    /* ---------- 2. server detail ---------- */
     public ApiSourceDto getApiSource(Integer id) {
         return exchange("/api/admin/apisources/" + id, HttpMethod.GET, null, ApiSourceDto.class);
     }
 
-    /* ---------- 3. create / update server ---------- */
     public ApiSourceDto saveApiSource(ApiSourceDto dto) {
         HttpMethod method = dto.getId() == null ? HttpMethod.POST : HttpMethod.PUT;
         String path = dto.getId() == null
@@ -34,13 +31,51 @@ public class AdminClient {
         return exchange(path, method, dto, ApiSourceDto.class);
     }
 
-    /* ---------- 4. add category ---------- */
     public Map<?, ?> addCategory(String name) {
         return exchange("/api/categories/admin", HttpMethod.POST,
                 Map.of("name", name), Map.class);
     }
 
-    /* ---------- helper ---------- */
+    /* ---------- NEW MODERATION CALLS ---------- */
+
+    public void hideArticle(long id) {
+        postNoBody("/api/admin/articles/visibility/hide/" + id);
+    }
+
+    public void unhideArticle(long id) {
+        postNoBody("/api/admin/articles/visibility/unhide/" + id);
+    }
+
+    public void hideCategory(int catId) {
+        postNoBody("/api/admin/articles/visibility/hide/category/" + catId);
+    }
+
+    public void unhideCategory(int catId) {
+        postNoBody("/api/admin/articles/visibility/unhide/category/" + catId);
+    }
+
+    public ReportDto[] fetchReports(long articleId) {
+        try {
+            return exchange("/api/admin/articles/visibility/reports/" + articleId,
+                    HttpMethod.GET, null, ReportDto[].class);
+        } catch (Exception e) {
+            if (e.getMessage().contains("LocalDateTime")) {
+                System.out.println("Server serialization issue detected. Reports feature temporarily unavailable.");
+                return new ReportDto[0];
+            }
+            throw e;
+        }
+    }
+
+
+
+    /* ---------- tiny helpers ---------- */
+
+    private void postNoBody(String path) {
+        exchange(path, HttpMethod.POST, null, Void.class);
+    }
+
+
     private <T> T exchange(String path, HttpMethod method, Object body, Class<T> type) {
         HttpHeaders hdr = new HttpHeaders();
         hdr.setBearerAuth(jwt);
@@ -61,5 +96,14 @@ public class AdminClient {
         private String apiKey;
         private Integer pollingFreq;
         private String status;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ReportDto {
+        private String userEmail;
+        private String reportedAt;
+        private String reason;
     }
 }

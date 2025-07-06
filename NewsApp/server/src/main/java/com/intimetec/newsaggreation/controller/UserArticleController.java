@@ -3,6 +3,8 @@ package com.intimetec.newsaggreation.controller;
 
 import com.intimetec.newsaggreation.dto.ArticleResponse;
 import com.intimetec.newsaggreation.model.ReactionType;
+import com.intimetec.newsaggreation.model.User;
+import com.intimetec.newsaggreation.service.ArticleReportingService;
 import com.intimetec.newsaggreation.service.UserArticleService;
 import com.intimetec.newsaggreation.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +27,7 @@ public class UserArticleController {
 
     private final UserArticleService service;
     private final UserRepository users;
+    private final ArticleReportingService articleReportingService;
 
     /* ----------------------------------------------------------- */
     /* utilities                                                   */
@@ -107,5 +110,16 @@ public class UserArticleController {
         return ResponseEntity.ok(like ? "Liked" : "Disliked");
     }
 
+    // src/main/java/com/intimetec/newsaggreation/controller/UserArticleController.java
+    @PostMapping("/report")
+    public ResponseEntity<String> reportArticle(@RequestParam("articleId") Long articleId,
+                                                @RequestParam("reason") String reason,
+                                                @AuthenticationPrincipal UserDetails principal) {
 
+        User user = users.findByEmail(principal.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        articleReportingService.submitReport(user, articleId, reason);
+        return ResponseEntity.ok("Report submitted");
+    }
 }
