@@ -3,6 +3,7 @@ package com.intimetec.newsaggregation.client;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.intimetec.newsaggregation.exception.NetworkException;
 import lombok.RequiredArgsConstructor;
 
 import java.net.URI;
@@ -21,30 +22,21 @@ public class NotificationClient {
     private final AuthClient auth;
     private final HttpClient client = HttpClient.newHttpClient();
 
-    /* ---------------- prefs ---------------- */
 
     public JsonNode fetchConfig() {
         return sendNoBody("GET", PREFS);
     }
 
     public JsonNode saveConfig(JsonNode body) {
-        // Jackson 2.15.x is perfectly happy with readTree/writeValueAsString
         String json = body.toPrettyString();
         return sendJson("PUT", PREFS, json);
     }
 
-    /* ---------------- notifications list ---------------- */
-
     public List<JsonNode> fetchNotifications() {
         JsonNode tree = sendNoBody("GET", LIST);
-        // avoid convertValue => readValue and raw generics are safe here
         return mapper.convertValue(tree, new TypeReference<>() {
         });
     }
-
-    /* ---------------------------------------------------------------------- */
-    /* internal helpers                                                       */
-    /* ---------------------------------------------------------------------- */
 
     private JsonNode sendNoBody(String method, String url) {
         return sendJson(method, url, null);
@@ -63,14 +55,15 @@ public class NotificationClient {
                 b.method(method, HttpRequest.BodyPublishers.noBody());
             }
 
-
             HttpResponse<String> resp = client.send(b.build(), HttpResponse.BodyHandlers.ofString());
             if (resp.statusCode() / 100 != 2) {
-                throw new RuntimeException("Failed – HTTP " + resp.statusCode() + " → " + resp.body());
+                throw new NetworkException("Failed – HTTP " + resp.statusCode() + " → " + resp.body(), resp.statusCode());
             }
             return mapper.readTree(resp.body());
+        } catch (NetworkException e) {
+            throw e;
         } catch (Exception ex) {
-            throw new RuntimeException(ex);
+            throw new NetworkException("Network error while accessing notifications", ex);
         }
     }
 }

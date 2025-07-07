@@ -8,23 +8,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-/**
- * Handles notification operations (view notifications, configure alerts).
- * Extracted from ConsoleMenu to follow Single Responsibility Principle.
- */
 public class NotificationHandler {
-    
+
     private final NotificationClient notificationClient;
     private final Scanner scanner;
-    
+
     public NotificationHandler(NotificationClient notificationClient, Scanner scanner) {
         this.notificationClient = notificationClient;
         this.scanner = scanner;
     }
-    
-    /**
-     * Displays user notifications.
-     */
+
     public void displayNotifications() {
         try {
             List<JsonNode> notes = notificationClient.fetchNotifications();
@@ -47,10 +40,8 @@ public class NotificationHandler {
             System.out.println("Error fetching notifications: " + e.getMessage());
         }
     }
-    
-    /**
-     * Shows the notifications menu.
-     */
+
+
     public void showNotificationsMenu() {
         while (true) {
             System.out.print("""
@@ -64,33 +55,41 @@ public class NotificationHandler {
             switch (scanner.nextLine().trim()) {
                 case "1" -> displayNotifications();
                 case "2" -> manageNotificationConfig();
-                case "3" -> { return; }
-                case "4" -> { System.out.println("Logged out."); System.exit(0); }
+                case "3" -> {
+                    return;
+                }
+                case "4" -> {
+                    System.out.println("Logged out.");
+                    System.exit(0);
+                }
                 default -> System.out.println("Invalid option");
             }
         }
     }
-    
-    /**
-     * Manages notification configuration.
-     */
+
+
     public void manageNotificationConfig() {
         try {
-            JsonNode cfg = notificationClient.fetchConfig();
+            JsonNode jsonNode = notificationClient.fetchConfig();
             while (true) {
-                System.out.println(buildConfigScreen(cfg));
+                System.out.println(buildConfigScreen(jsonNode));
                 String opt = scanner.nextLine().trim();
                 switch (opt) {
                     case "1", "2", "3", "4" -> {
-                        toggleCategory(cfg, opt);
-                        cfg = notificationClient.saveConfig(cfg);
+                        toggleCategory(jsonNode, opt);
+                        jsonNode = notificationClient.saveConfig(jsonNode);
                     }
                     case "5" -> {
-                        cfg = manageKeywords(cfg);
-                        cfg = notificationClient.saveConfig(cfg);
+                        jsonNode = manageKeywords(jsonNode);
+                        jsonNode = notificationClient.saveConfig(jsonNode);
                     }
-                    case "6" -> { return; }
-                    case "7" -> { System.out.println("Logged out."); System.exit(0); }
+                    case "6" -> {
+                        return;
+                    }
+                    case "7" -> {
+                        System.out.println("Logged out.");
+                        System.exit(0);
+                    }
                     default -> System.out.println("Invalid option");
                 }
             }
@@ -98,7 +97,7 @@ public class NotificationHandler {
             System.out.println("Error managing notification config: " + e.getMessage());
         }
     }
-    
+
     private String buildConfigScreen(JsonNode cfg) {
         return String.format("""
                         \nC O N F I G U R E - N O T I F I C A T I O N S
@@ -117,43 +116,43 @@ public class NotificationHandler {
                 cfg.path("keywords").size() > 0 ? "Enabled" : "Disabled");
     }
 
-    private static String onOff(JsonNode cfg, String field) {
-        return cfg.path(field).asBoolean() ? "Enabled" : "Disabled";
+    private static String onOff(JsonNode config, String field) {
+        return config.path(field).asBoolean() ? "Enabled" : "Disabled";
     }
 
-    private void toggleCategory(JsonNode cfg, String option) {
+    private void toggleCategory(JsonNode jsonNode, String option) {
         String field = switch (option) {
             case "1" -> "business";
             case "2" -> "entertainment";
             case "3" -> "sports";
             default -> "technology";
         };
-        boolean current = cfg.path(field).asBoolean();
-        ((ObjectNode) cfg).put(field, !current);
+        boolean current = jsonNode.path(field).asBoolean();
+        ((ObjectNode) jsonNode).put(field, !current);
     }
 
-    private JsonNode manageKeywords(JsonNode cfg) {
-        List<String> kw = new ArrayList<>();
-        cfg.path("keywords").forEach(k -> kw.add(k.path("term").asText()));
+    private JsonNode manageKeywords(JsonNode jsonNode) {
+        List<String> keyword = new ArrayList<>();
+        jsonNode.path("keywords").forEach(k -> keyword.add(k.path("term").asText()));
 
         while (true) {
-            System.out.println("\nCurrent keywords: " + (kw.isEmpty() ? "<none>" : kw));
+            System.out.println("\nCurrent keywords: " + (keyword.isEmpty() ? "<none>" : keyword));
             System.out.print("1. Add  2. Remove  3. Done\n> ");
             switch (scanner.nextLine().trim()) {
                 case "1" -> {
                     System.out.print("Enter keyword: ");
-                    String k = scanner.nextLine().trim().toLowerCase();
-                    if (!k.isBlank() && !kw.contains(k)) kw.add(k);
+                    String KeywordlowerCase = scanner.nextLine().trim().toLowerCase();
+                    if (!KeywordlowerCase.isBlank() && !keyword.contains(KeywordlowerCase)) keyword.add(KeywordlowerCase);
                 }
                 case "2" -> {
                     System.out.print("Keyword to remove: ");
-                    kw.remove(scanner.nextLine().trim().toLowerCase());
+                    keyword.remove(scanner.nextLine().trim().toLowerCase());
                 }
                 case "3" -> {
-                    var arr = new com.fasterxml.jackson.databind.ObjectMapper().createArrayNode();
-                    kw.forEach(k -> arr.add(new com.fasterxml.jackson.databind.ObjectMapper().createObjectNode().putNull("id").put("term", k)));
-                    ((ObjectNode) cfg).set("keywords", arr);
-                    return cfg;
+                    var jsonNodes = new com.fasterxml.jackson.databind.ObjectMapper().createArrayNode();
+                    keyword.forEach(key -> jsonNodes.add(new com.fasterxml.jackson.databind.ObjectMapper().createObjectNode().putNull("id").put("term", key)));
+                    ((ObjectNode) jsonNode).set("keywords", jsonNodes);
+                    return jsonNode;
                 }
                 default -> System.out.println("Invalid");
             }

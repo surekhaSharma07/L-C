@@ -42,33 +42,26 @@ class JwtAuthenticationFilterTest {
 
     @Test
     void testConstructor() {
-        // Act & Assert
         assertNotNull(jwtAuthenticationFilter);
     }
 
     @Test
     void testDoFilterInternal_WithNoAuthorizationHeader() throws Exception {
-        // Arrange
         when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn(null);
 
-        // Act
         jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
 
-        // Assert
         verify(request).getHeader(HttpHeaders.AUTHORIZATION);
         verify(filterChain).doFilter(request, response);
     }
 
     @Test
     void testDoFilterInternal_WithNonBearerToken() throws Exception {
-        // Arrange
         String authHeader = "Basic dXNlcjpwYXNz";
         when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn(authHeader);
 
-        // Act
         jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
 
-        // Assert
         verify(request).getHeader(HttpHeaders.AUTHORIZATION);
         verify(filterChain).doFilter(request, response);
     }

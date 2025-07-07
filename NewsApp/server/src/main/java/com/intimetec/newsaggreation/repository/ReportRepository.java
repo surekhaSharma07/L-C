@@ -1,4 +1,3 @@
-// src/main/java/com/intimetec/newsaggreation/repository/ReportRepository.java
 package com.intimetec.newsaggreation.repository;
 
 import com.intimetec.newsaggreation.model.Article;

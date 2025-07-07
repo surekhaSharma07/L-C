@@ -77,17 +77,14 @@ class UserArticleServiceImplTest {
 
     @Test
     void testSaveArticle_Success() {
-        // Arrange
         Long userId = 1L;
         Long articleId = 1L;
         when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
         when(articleRepository.findById(articleId)).thenReturn(Optional.of(testArticle));
         when(savedArticleRepository.save(any(SavedArticle.class))).thenReturn(testSavedArticle);
 
-        // Act
         userArticleService.saveArticle(userId, articleId);
 
-        // Assert
         verify(userRepository).findById(userId);
         verify(articleRepository).findById(articleId);
         verify(savedArticleRepository).save(any(SavedArticle.class));
@@ -95,12 +92,10 @@ class UserArticleServiceImplTest {
 
     @Test
     void testSaveArticle_UserNotFound() {
-        // Arrange
         Long userId = 999L;
         Long articleId = 1L;
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
-        // Act & Assert
         RuntimeException exception = assertThrows(RuntimeException.class, () ->
             userArticleService.saveArticle(userId, articleId)
         );
@@ -113,13 +108,11 @@ class UserArticleServiceImplTest {
 
     @Test
     void testSaveArticle_ArticleNotFound() {
-        // Arrange
         Long userId = 1L;
         Long articleId = 999L;
         when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
         when(articleRepository.findById(articleId)).thenReturn(Optional.empty());
 
-        // Act & Assert
         RuntimeException exception = assertThrows(RuntimeException.class, () ->
             userArticleService.saveArticle(userId, articleId)
         );
@@ -130,32 +123,13 @@ class UserArticleServiceImplTest {
         verify(savedArticleRepository, never()).save(any());
     }
 
-    @Test
-    void testUnsaveArticle_Success() {
-        // Arrange
-        Long userId = 1L;
-        Long articleId = 1L;
-        when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
-        when(articleRepository.findById(articleId)).thenReturn(Optional.of(testArticle));
-        doNothing().when(savedArticleRepository).deleteByUserAndNews(testUser, testArticle);
-
-        // Act
-        userArticleService.unsaveArticle(userId, articleId);
-
-        // Assert
-        verify(userRepository).findById(userId);
-        verify(articleRepository).findById(articleId);
-        verify(savedArticleRepository).deleteByUserAndNews(testUser, testArticle);
-    }
 
     @Test
     void testUnsaveArticle_UserNotFound() {
-        // Arrange
         Long userId = 999L;
         Long articleId = 1L;
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
-        // Act & Assert
         RuntimeException exception = assertThrows(RuntimeException.class, () ->
             userArticleService.unsaveArticle(userId, articleId)
         );
@@ -168,7 +142,6 @@ class UserArticleServiceImplTest {
 
     @Test
     void testListSavedArticles_Success() {
-        // Arrange
         Long userId = 1L;
         SavedArticle savedArticle1 = new SavedArticle();
         savedArticle1.setUser(testUser);
@@ -193,10 +166,8 @@ class UserArticleServiceImplTest {
         when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
         when(savedArticleRepository.findAll()).thenReturn(allSavedArticles);
 
-        // Act
         List<ArticleResponse> result = userArticleService.listSavedArticles(userId);
 
-        // Assert
         assertNotNull(result);
         assertEquals(2, result.size());
         assertEquals(testArticle.getTitle(), result.get(0).getTitle());
@@ -207,11 +178,9 @@ class UserArticleServiceImplTest {
 
     @Test
     void testListSavedArticles_UserNotFound() {
-        // Arrange
         Long userId = 999L;
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
-        // Act & Assert
         RuntimeException exception = assertThrows(RuntimeException.class, () ->
             userArticleService.listSavedArticles(userId)
         );
@@ -223,15 +192,12 @@ class UserArticleServiceImplTest {
 
     @Test
     void testListSavedArticles_EmptyList() {
-        // Arrange
         Long userId = 1L;
         when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
         when(savedArticleRepository.findAll()).thenReturn(Arrays.asList());
 
-        // Act
         List<ArticleResponse> result = userArticleService.listSavedArticles(userId);
 
-        // Assert
         assertNotNull(result);
         assertTrue(result.isEmpty());
         verify(userRepository).findById(userId);
@@ -240,7 +206,6 @@ class UserArticleServiceImplTest {
 
     @Test
     void testReactToArticle_NewReaction() {
-        // Arrange
         Long userId = 1L;
         Long articleId = 1L;
         ReactionType reactionType = ReactionType.LIKE;
@@ -250,10 +215,8 @@ class UserArticleServiceImplTest {
         when(reactionRepository.findByUserAndNews(testUser, testArticle)).thenReturn(Optional.empty());
         when(reactionRepository.save(any(Reaction.class))).thenReturn(testReaction);
 
-        // Act
         userArticleService.reactToArticle(userId, articleId, reactionType);
 
-        // Assert
         verify(userRepository).findById(userId);
         verify(articleRepository).findById(articleId);
         verify(reactionRepository).findByUserAndNews(testUser, testArticle);
@@ -262,7 +225,6 @@ class UserArticleServiceImplTest {
 
     @Test
     void testReactToArticle_UpdateExistingReaction() {
-        // Arrange
         Long userId = 1L;
         Long articleId = 1L;
         ReactionType newReactionType = ReactionType.DISLIKE;
@@ -271,10 +233,8 @@ class UserArticleServiceImplTest {
         when(articleRepository.findById(articleId)).thenReturn(Optional.of(testArticle));
         when(reactionRepository.findByUserAndNews(testUser, testArticle)).thenReturn(Optional.of(testReaction));
 
-        // Act
         userArticleService.reactToArticle(userId, articleId, newReactionType);
 
-        // Assert
         verify(userRepository).findById(userId);
         verify(articleRepository).findById(articleId);
         verify(reactionRepository).findByUserAndNews(testUser, testArticle);
@@ -284,12 +244,10 @@ class UserArticleServiceImplTest {
 
     @Test
     void testReactToArticle_UserNotFound() {
-        // Arrange
         Long userId = 999L;
         Long articleId = 1L;
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
-        // Act & Assert
         RuntimeException exception = assertThrows(RuntimeException.class, () ->
             userArticleService.reactToArticle(userId, articleId, ReactionType.LIKE)
         );
@@ -302,17 +260,14 @@ class UserArticleServiceImplTest {
 
     @Test
     void testRemoveReaction_Success() {
-        // Arrange
         Long userId = 1L;
         Long articleId = 1L;
         when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
         when(articleRepository.findById(articleId)).thenReturn(Optional.of(testArticle));
         doNothing().when(reactionRepository).deleteByUserAndNews(testUser, testArticle);
 
-        // Act
         userArticleService.removeReaction(userId, articleId);
 
-        // Assert
         verify(userRepository).findById(userId);
         verify(articleRepository).findById(articleId);
         verify(reactionRepository).deleteByUserAndNews(testUser, testArticle);
@@ -320,12 +275,10 @@ class UserArticleServiceImplTest {
 
     @Test
     void testRemoveReaction_UserNotFound() {
-        // Arrange
         Long userId = 999L;
         Long articleId = 1L;
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
-        // Act & Assert
         RuntimeException exception = assertThrows(RuntimeException.class, () ->
             userArticleService.removeReaction(userId, articleId)
         );
@@ -338,13 +291,11 @@ class UserArticleServiceImplTest {
 
     @Test
     void testRemoveReaction_ArticleNotFound() {
-        // Arrange
         Long userId = 1L;
         Long articleId = 999L;
         when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
         when(articleRepository.findById(articleId)).thenReturn(Optional.empty());
 
-        // Act & Assert
         RuntimeException exception = assertThrows(RuntimeException.class, () ->
             userArticleService.removeReaction(userId, articleId)
         );

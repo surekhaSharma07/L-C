@@ -5,6 +5,7 @@ import com.intimetec.newsaggreation.model.ApiSource;
 import com.intimetec.newsaggreation.repository.ApiSourceRepository;
 import com.intimetec.newsaggreation.service.ApiSourceService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
@@ -15,48 +16,59 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ApiSourceServiceImpl implements ApiSourceService {
 
-    private final ApiSourceRepository repo;
-    private final RestTemplate restTemplate = new RestTemplate();   // simple health‑check
+    private final ApiSourceRepository apiSourceRepository;
+    private final RestTemplate restTemplate = new RestTemplate();
 
-    /* 1️⃣  List with live status */
     @Override
     public List<ApiSourceDto> findAll() {
-        return repo.findAll().stream()
+        log.info("Finding all ApiSources");
+        return apiSourceRepository.findAll().stream()
                 .map(this::toDtoWithStatus)
                 .collect(Collectors.toList());
     }
 
-    /* 2️⃣  Single source detail */
     @Override
     public ApiSourceDto findById(Integer id) {
-        return repo.findById(id)
+        log.info("Finding ApiSource by ID: {}", id);
+        return apiSourceRepository.findById(id)
                 .map(this::toDtoWithStatus)
-                .orElseThrow(() -> new IllegalArgumentException("ApiSource not found"));
+                .orElseThrow(() -> {
+                    log.error("ApiSource with ID {} not found", id);
+                    return new IllegalArgumentException("ApiSource not found");
+                });
     }
 
-    /* 3️⃣  Create OR update */
     @Override
-    public ApiSourceDto save(ApiSourceDto dto) {
-        ApiSource entity = dto.getId() == null
+    public ApiSourceDto save(ApiSourceDto apiSourceDto) {
+        log.info("Saving ApiSource: {}", apiSourceDto);
+        ApiSource entity = apiSourceDto.getId() == null
                 ? new ApiSource()
-                : repo.findById(dto.getId())
-                .orElseThrow(() -> new IllegalArgumentException("ApiSource not found"));
+                : apiSourceRepository.findById(apiSourceDto.getId())
+                .orElseThrow(() -> {
+                    log.error("ApiSource with ID {} not found for update", apiSourceDto.getId());
+                    return new IllegalArgumentException("ApiSource not found");
+                });
 
-        BeanUtils.copyProperties(dto, entity, "id", "status");
-        ApiSource saved = repo.save(entity);
+        BeanUtils.copyProperties(apiSourceDto, entity, "id", "status");
+        ApiSource saved = apiSourceRepository.save(entity);
+        log.info("ApiSource saved: {}", saved);
         return toDtoWithStatus(saved);
     }
 
-    private ApiSourceDto toDtoWithStatus(ApiSource e) {
+    private ApiSourceDto toDtoWithStatus(ApiSource apiSource) {
+        log.info("Checking status for ApiSource: {}", apiSource.getName());
         ApiSourceDto d = new ApiSourceDto();
-        BeanUtils.copyProperties(e, d);
+        BeanUtils.copyProperties(apiSource, d);
         try {
-            restTemplate.getForEntity(e.getEndpointUrl(), String.class);
+            restTemplate.getForEntity(apiSource.getEndpointUrl(), String.class);
             d.setStatus("UP");
+            log.info("ApiSource {} is UP", apiSource.getName());
         } catch (RestClientException ex) {
             d.setStatus("DOWN");
+            log.error("ApiSource {} is DOWN due to: {}", apiSource.getName(), ex.getMessage());
         }
         return d;
     }

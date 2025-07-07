@@ -10,6 +10,7 @@ import com.intimetec.newsaggreation.repository.BlockedKeywordRepository;
 import com.intimetec.newsaggreation.repository.ReportRepository;
 import com.intimetec.newsaggreation.service.ArticleReportingService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -21,11 +22,12 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ArticleReportingServiceImpl implements ArticleReportingService {
 
     private final ArticleRepository articleRepository;
     private final ReportRepository reportRepository;
-    private final BlockedKeywordRepository keywordRepo;
+    private final BlockedKeywordRepository keywordRepository;
 
     @Value("${report.autoHideThreshold:3}")
     private int autoHideThreshold;
@@ -33,10 +35,15 @@ public class ArticleReportingServiceImpl implements ArticleReportingService {
     @Transactional
     @Override
     public void submitReport(User user, Long articleId, String reason) {
+        log.info("Submitting report for user {} on article {}", user.getId(), articleId);
         Article article = articleRepository.findById(articleId)
-                .orElseThrow(() -> new RuntimeException("Article not found"));
+                .orElseThrow(() -> {
+                    log.error("Article not found for report submission: articleId={}", articleId);
+                    return new RuntimeException("Article not found");
+                });
 
         if (reportRepository.existsByUserAndArticle(user, article)) {
+            log.warn("User {} has already reported article {}", user.getId(), articleId);
             throw new RuntimeException("You have already reported this article.");
         }
 
@@ -44,6 +51,7 @@ public class ArticleReportingServiceImpl implements ArticleReportingService {
 
         int count = reportRepository.countByArticle(article);
         if (count >= autoHideThreshold && !article.isHidden()) {
+            log.info("Article {} is hidden due to report threshold.", articleId);
             article.setHidden(true);
         }
     }
@@ -51,65 +59,89 @@ public class ArticleReportingServiceImpl implements ArticleReportingService {
     @Transactional
     @Override
     public void markArticleAsHidden(Long articleId) {
+        log.info("Marking article {} as hidden.", articleId);
         articleRepository.findById(articleId)
-                .ifPresent(article -> article.setHidden(true));
+                .ifPresent(article -> {
+                    article.setHidden(true);
+                    log.info("Article {} is now hidden.", articleId);
+                });
     }
 
     @Transactional
     @Override
     public void markArticleAsVisible(Long articleId) {
+        log.info("Marking article {} as visible.", articleId);
         articleRepository.findById(articleId)
-                .ifPresent(article -> article.setHidden(false));
+                .ifPresent(article -> {
+                    article.setHidden(false);
+                    log.info("Article {} is now visible.", articleId);
+                });
     }
 
     @Transactional
     public void addBlockedKeyword(String term) {
-        String lc = term.toLowerCase();
-        if (keywordRepo.existsByTermIgnoreCase(lc)) return;
+        log.info("Attempting to add blocked keyword: {}", term);
+        String termLowerCase = term.toLowerCase();
+        if (keywordRepository.existsByTermIgnoreCase(termLowerCase)) {
+            log.warn("Blocked keyword {} already exists.", term);
+            return;
+        }
 
-        keywordRepo.save(new BlockedKeyword(null, lc));
+        keywordRepository.save(new BlockedKeyword(null, termLowerCase));
+        log.info("Blocked keyword {} added.", term);
 
-        // retro‑actively hide
         articleRepository.findAll().stream()
-                .filter(a -> !a.isHidden())
-                .filter(a -> contains(a, lc))
-                .forEach(a -> a.setHidden(true));
+                .filter(article -> !article.isHidden())
+                .filter(article -> contains(article, termLowerCase))
+                .forEach(article -> {
+                    article.setHidden(true);
+                    log.info("Article {} hidden due to new blocked keyword.", article.getId());
+                });
     }
 
     @Transactional
     public void removeBlockedKeyword(String term) {
-        keywordRepo.findAll().stream()
-                .filter(k -> k.getTerm().equalsIgnoreCase(term))
+        log.info("Attempting to remove blocked keyword: {}", term);
+        keywordRepository.findAll().stream()
+                .filter(keyword -> keyword.getTerm().equalsIgnoreCase(term))
                 .findFirst()
-                .ifPresent(keywordRepo::delete);
+                .ifPresent(keywordRepository::delete);
+        log.info("Blocked keyword {} removed.", term);
     }
 
-    private boolean contains(Article a, String kw) {
-        String l = kw.toLowerCase();
-        return a.getTitle().toLowerCase().contains(l)
-                || a.getDescription().toLowerCase().contains(l);
+    private boolean contains(Article article, String keyword) {
+        String l = keyword.toLowerCase();
+        return article.getTitle().toLowerCase().contains(l)
+                || article.getDescription().toLowerCase().contains(l);
     }
 
     @Transactional
     public void hideAllByCategory(Integer categoryId) {
+        log.info("Hiding all articles in category {}", categoryId);
         articleRepository.findByPrimaryCategory_Id(categoryId)
-                .forEach(article -> article.setHidden(true));
+                .forEach(article -> {
+                    article.setHidden(true);
+                    log.info("Article {} hidden by category.", article.getId());
+                });
     }
 
     @Transactional
     public void unhideAllByCategory(Integer categoryId) {
+        log.info("Unhiding all articles in category {}", categoryId);
         articleRepository.findByPrimaryCategory_Id(categoryId)
-                .forEach(article -> article.setHidden(false));
+                .forEach(article -> {
+                    article.setHidden(false);
+                    log.info("Article {} unhidden by category.", article.getId());
+                });
     }
 
-@Override
+    @Override
     public List<ReportDto> getReportsForArticle(Long articleId) {
+        log.info("Fetching reports for article {}", articleId);
         return reportRepository.findByArticle_Id(articleId)
                 .stream()
                 .map(ReportDto::from)
                 .toList();
     }
-
-
 }
 

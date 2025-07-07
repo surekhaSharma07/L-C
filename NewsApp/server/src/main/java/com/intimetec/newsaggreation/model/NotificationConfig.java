@@ -18,23 +18,19 @@ public class NotificationConfig {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /* one‑to‑one per user; keep ManyToOne if you already rely on it */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
-    /* existing fields */
     private String channel;
     private LocalDateTime time;
     private boolean enabled;
 
-    /* NEW — category toggles */
     private boolean business;
     private boolean entertainment;
     private boolean sports;
     private boolean technology;
 
-    /* NEW — keywords linked to this config */
     @ManyToMany
     @JoinTable(name = "config_keywords",
             joinColumns = @JoinColumn(name = "config_id"),

@@ -7,8 +7,7 @@ import com.intimetec.newsaggreation.model.Article;
 import com.intimetec.newsaggreation.model.Category;
 import com.intimetec.newsaggreation.service.ArticleService;
 import com.intimetec.newsaggreation.service.CategoryService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -21,9 +20,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Component
+@Slf4j
 class NewsFetchService {
-
-    private static final Logger log = LoggerFactory.getLogger(NewsFetchService.class);
 
     private final ArticleService articleService;
     private final CategoryService categoryService;
@@ -41,6 +39,7 @@ class NewsFetchService {
     }
 
     void processSource(ApiSource src) {
+        log.info("Processing news fetch for source: {}", src.getName());
         try {
             Endpoint ep = buildEndpoint(src);
             if (ep == null) return;
@@ -85,6 +84,7 @@ class NewsFetchService {
             try {
                 String link = node.path("url").asText(null);
                 if (link == null || articleService.existsByUrl(link)) return;
+                log.debug("Processing article with url: {} from source: {}", link, src.getName());
                 articleService.save(buildArticle(node, src, link));
             } catch (Exception e) {
                 log.warn("Skipping article – {}", e.getMessage());
@@ -108,15 +108,15 @@ class NewsFetchService {
     private Set<Category> resolveCategories(JsonNode n, ApiSource src) {
         Set<Category> out = new HashSet<>();
         JsonNode arr = n.get("categories");
-        if (arr != null && arr.isArray()) arr.forEach(j -> addCat(out, j.asText()));
+        if (arr != null && arr.isArray()) arr.forEach(j -> addCategory(out, j.asText()));
         if (out.isEmpty() && "NewsAPI".equals(src.getName()))
-            addCat(out, queryParam(src.getEndpointUrl(), "category"));
+            addCategory(out, getQueryParam(src.getEndpointUrl(), "category"));
         if (out.isEmpty() && n.has("source") && n.get("source").has("name"))
-            addCat(out, n.get("source").get("name").asText());
+            addCategory(out, n.get("source").get("name").asText());
         return out;
     }
 
-    private void addCat(Set<Category> set, String raw) {
+    private void addCategory(Set<Category> set, String raw) {
         if (raw != null && !raw.isBlank()) set.add(categoryService.findOrCreate(raw.trim()));
     }
 
@@ -126,7 +126,7 @@ class NewsFetchService {
                 : LocalDateTime.parse(iso.replace("Z", ""), DateTimeFormatter.ISO_DATE_TIME);
     }
 
-    private String queryParam(String url, String key) {
+    private String getQueryParam(String url, String key) {
         try {
             String q = new URI(url).getRawQuery();
             return Arrays.stream(q.split("&"))

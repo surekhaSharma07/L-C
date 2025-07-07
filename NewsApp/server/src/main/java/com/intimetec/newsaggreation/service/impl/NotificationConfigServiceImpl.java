@@ -21,56 +21,71 @@ import com.intimetec.newsaggreation.service.NotificationConfigService;
 import com.intimetec.newsaggreation.util.NotificationConfigFactory;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class NotificationConfigServiceImpl implements NotificationConfigService {
 
-    private final NotificationConfigRepository configRepo;
-    private final KeywordRepository keywordRepo;
-    private final UserRepository userRepo;
-
+    private final NotificationConfigRepository notificationConfigRepository;
+    private final KeywordRepository keywordRepository;
+    private final UserRepository userRepository;
 
     @Override
     public NotificationConfigDto getCurrentUserConfigByEmail(String email) {
-        User user = userRepo.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        log.info("Getting notification config for user by email: {}", email);
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> {
+                    log.error("User not found for email: {}", email);
+                    return new RuntimeException("User not found");
+                });
 
-        NotificationConfig config = configRepo.findByUserId(user.getId())
-                .orElseGet(() -> configRepo.save(NotificationConfigFactory.createDefault(user)));
+        NotificationConfig config = notificationConfigRepository.findByUserId(user.getId())
+                .orElseGet(() -> notificationConfigRepository.save(NotificationConfigFactory.createDefault(user)));
 
         return NotificationMapper.toDto(config);
     }
 
     @Override
     public NotificationConfigDto getCurrentUserConfig(Long userId) {
-        NotificationConfig cfg = configRepo.findByUserId(userId)
-                .orElseThrow(() -> new IllegalArgumentException("Config not found"));
+        log.info("Getting notification config for user by id: {}", userId);
+        NotificationConfig cfg = notificationConfigRepository.findByUserId(userId)
+                .orElseThrow(() -> {
+                    log.error("Config not found for user id: {}", userId);
+                    return new IllegalArgumentException("Config not found");
+                });
         return NotificationMapper.toDto(cfg);
     }
 
     @Override
     @Transactional
     public void updateConfig(Long userId, NotificationConfigDto dto) {
-        NotificationConfig cfg = configRepo.findByUserId(userId)
-                .orElseThrow(() -> new IllegalArgumentException("Config not found"));
+        log.info("Updating notification config for user id: {}", userId);
+        NotificationConfig notificationConfig = notificationConfigRepository.findByUserId(userId)
+                .orElseThrow(() -> {
+                    log.error("Config not found for user id: {}", userId);
+                    return new IllegalArgumentException("Config not found");
+                });
 
-        cfg.setBusiness(dto.business());
-        cfg.setEntertainment(dto.entertainment());
-        cfg.setSports(dto.sports());
-        cfg.setTechnology(dto.technology());
+        notificationConfig.setBusiness(dto.business());
+        notificationConfig.setEntertainment(dto.entertainment());
+        notificationConfig.setSports(dto.sports());
+        notificationConfig.setTechnology(dto.technology());
 
-        cfg.getKeywords().clear();
-        for (KeywordDto kd : dto.keywords()) {
-            Keyword k = keywordRepo
-                    .findByTermIgnoreCase(kd.term())
+        notificationConfig.getKeywords().clear();
+        for (KeywordDto keywordDto : dto.keywords()) {
+            log.info("Processing keyword: {} for user id: {}", keywordDto.term(), userId);
+            Keyword keyword = keywordRepository
+                    .findByTermIgnoreCase(keywordDto.term())
                     .orElseGet(() -> {
-                        Keyword nk = new Keyword();
-                        nk.setTerm(kd.term());
-                        return keywordRepo.save(nk);
+                        Keyword newKeyword = new Keyword();
+                        newKeyword.setTerm(keywordDto.term());
+                        log.info("Creating new keyword: {} for user id: {}", keywordDto.term(), userId);
+                        return keywordRepository.save(newKeyword);
                     });
-            cfg.getKeywords().add(k);
+            notificationConfig.getKeywords().add(keyword);
         }
     }
 }

@@ -8,12 +8,16 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
 
-@AllArgsConstructor
 public class AdminClient {
 
     private final String baseUrl;
     private final String jwt;
     private final RestTemplate rest = new RestTemplate();
+
+    public AdminClient(String baseUrl, String jwt) {
+        this.baseUrl = baseUrl;
+        this.jwt = jwt;
+    }
 
     public ApiSourceDto[] listApiSources() {
         return exchange("/api/admin/apisources", HttpMethod.GET, null, ApiSourceDto[].class);
@@ -36,7 +40,6 @@ public class AdminClient {
                 Map.of("name", name), Map.class);
     }
 
-    /* ---------- NEW MODERATION CALLS ---------- */
 
     public void hideArticle(long id) {
         postNoBody("/api/admin/articles/visibility/hide/" + id);
@@ -68,13 +71,9 @@ public class AdminClient {
     }
 
 
-
-    /* ---------- tiny helpers ---------- */
-
     private void postNoBody(String path) {
         exchange(path, HttpMethod.POST, null, Void.class);
     }
-
 
     private <T> T exchange(String path, HttpMethod method, Object body, Class<T> type) {
         HttpHeaders hdr = new HttpHeaders();

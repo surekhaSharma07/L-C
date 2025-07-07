@@ -1,16 +1,3 @@
-//package com.intimetec.newsaggreation.repository;
-//
-//import com.intimetec.newsaggreation.model.Article;
-//import org.springframework.data.jpa.repository.JpaRepository;
-//
-//import java.time.LocalDateTime;
-//import java.util.List;
-//
-//public interface ArticleRepository extends JpaRepository<Article, Long> {
-//    boolean existsByUrl(String url);
-//    List<Article> findAllByPublishedAtBetween(LocalDateTime start, LocalDateTime end);
-//}
-///////
 package com.intimetec.newsaggreation.repository;
 
 import com.intimetec.newsaggreation.model.Article;
@@ -50,12 +37,8 @@ ArticleRepository extends JpaRepository<Article, Long> {
             String categoryName
     );
 
-    /* ➕ NEW — used by ModerationService to hide/unhide entire category */
     List<Article> findByPrimaryCategory_Id(Integer categoryId);
 
-    /**
-     * Fetch recent articles together with their primaryCategory to avoid lazy‑init errors
-     */
     @Query("""
             SELECT a
             FROM   Article a

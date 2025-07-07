@@ -60,8 +60,7 @@ import com.intimetec.newsaggreation.service.NotificationService;   // ← your i
 import com.intimetec.newsaggreation.util.NotificationConfigFactory;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -69,86 +68,38 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class NotificationServiceImpl implements NotificationService {
 
-    private static final Logger log = LoggerFactory.getLogger(NotificationServiceImpl.class);
-//
     private final UserRepository userRepository;
     private final NotificationRepository notificationRepository;
-//    private final NotificationConfigRepository configRepo;
-//    private final KeywordRepository keywordRepo;
-//
-//    /* -------- GET prefs by email -------------------------------------- */
-//    @Override
-//    public NotificationConfigDto getCurrentUserConfigByEmail(String email) {
-//        User user = userRepository.findByEmail(email)
-//                .orElseThrow(() -> new RuntimeException("User not found"));
-//
-//        NotificationConfig cfg = configRepo.findByUserId(user.getId())
-//                .orElseGet(() -> createAndSaveDefaultConfig(user));
-//
-//        return NotificationMapper.toDto(cfg);
-//    }
+    private final ArticleRepository articleRepository;
 
-    /* -------- UPDATE prefs -------------------------------------------- */
-//    @Override
-//    @Transactional
-//    public NotificationConfigDto updatePreferences(String email, NotificationConfigDto dto) {
-//        User user = userRepository.findByEmail(email)
-//                .orElseThrow(() -> new RuntimeException("User not found"));
-//
-//        NotificationConfig cfg = configRepo.findByUserId(user.getId())
-//                .orElseGet(() -> createAndSaveDefaultConfig(user));
-//
-//        cfg.setBusiness(dto.business());
-//        cfg.setEntertainment(dto.entertainment());
-//        cfg.setSports(dto.sports());
-//        cfg.setTechnology(dto.technology());
-//
-//        cfg.getKeywords().clear();
-//        for (KeywordDto kd : dto.keywords()) {
-//            Keyword k = keywordRepo.findByTermIgnoreCase(kd.term())
-//                    .orElseGet(() -> keywordRepo.save(new Keyword(null, kd.term(), new HashSet<>())));
-//            cfg.getKeywords().add(k);
-//        }
-//
-//        NotificationConfig saved = configRepo.save(cfg);
-//        log.debug("Notification preferences updated for {}", email);
-//        return NotificationMapper.toDto(saved);
-//    }
-//
-//    /* -------- helper --------------------------------------------------- */
-//    private NotificationConfig createAndSaveDefaultConfig(User user) {
-//        return configRepo.save(NotificationConfigFactory.createDefault(user));
-//    }
+    @Override
+    public List<NotificationDto> findByUserEmail(String email) {
+        log.info("Finding notifications for user with email: {}", email);
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> {
+                    log.error("User not found for email: {}", email);
+                    return new RuntimeException("User not found");
+                });
 
+        List<Notification> list = notificationRepository.findByUserOrderBySentAtDesc(user);
 
-        private final ArticleRepository articleRepository;   // ⬅ add this
+        return list.stream()
+                .map(notification -> {
+                    Article article = articleRepository.findById(notification.getNewsId())
+                            .orElse(null);
 
-        @Override
-        public List<NotificationDto> findByUserEmail(String email) {
-
-            User user = userRepository.findByEmail(email)
-                    .orElseThrow(() -> new RuntimeException("User not found"));
-
-            // adjust the method name to the actual field in Notification (sentAt / createdAt)
-            List<Notification> list = notificationRepository.findByUserOrderBySentAtDesc(user);
-
-            return list.stream()
-                    .map(n -> {
-                        // fetch the referenced article
-                        Article art = articleRepository.findById(n.getNewsId())
-                                .orElse(null);
-
-                        return new NotificationDto(
-                                n.getId(),
-                                n.getType(),
-                                art != null ? art.getTitle() : "(article deleted)",
-                                art != null ? art.getUrl()   : "",
-                                n.getSentAt().toString()
-                        );
-                    })
-                    .toList();
-        }
+                    return new NotificationDto(
+                            notification.getId(),
+                            notification.getType(),
+                            article != null ? article.getTitle() : "(article deleted)",
+                            article != null ? article.getUrl() : "",
+                            notification.getSentAt().toString()
+                    );
+                })
+                .toList();
     }
+}
 
