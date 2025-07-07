@@ -1,5 +1,7 @@
 package com.intimetec.newsaggregation.client;
 
+import com.intimetec.newsaggregation.dto.ApiSourceDto;
+import com.intimetec.newsaggregation.dto.ReportDto;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -14,7 +16,7 @@ class AdminClientTest {
 
     @Test
     void testApiSourceDtoCreation() {
-        AdminClient.ApiSourceDto dto = new AdminClient.ApiSourceDto(1, TEST_NAME, TEST_URL, TEST_API_KEY, TEST_POLLING_FREQ, TEST_STATUS);
+        ApiSourceDto dto = new ApiSourceDto(1, TEST_NAME, TEST_URL, TEST_API_KEY, TEST_POLLING_FREQ, TEST_STATUS);
         assertEquals(1, dto.getId());
         assertEquals(TEST_NAME, dto.getName());
         assertEquals(TEST_URL, dto.getEndpointUrl());
@@ -25,7 +27,7 @@ class AdminClientTest {
 
     @Test
     void testReportDtoCreation() {
-        AdminClient.ReportDto dto = new AdminClient.ReportDto(TEST_EMAIL, TEST_REPORTED_AT, TEST_REASON);
+       ReportDto dto = new ReportDto(TEST_EMAIL, TEST_REPORTED_AT, TEST_REASON);
         assertEquals(TEST_EMAIL, dto.getUserEmail());
         assertEquals(TEST_REPORTED_AT, dto.getReportedAt());
         assertEquals(TEST_REASON, dto.getReason());

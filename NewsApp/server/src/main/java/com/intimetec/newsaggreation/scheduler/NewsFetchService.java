@@ -48,8 +48,8 @@ class NewsFetchService {
             JsonNode items = root.has("data") ? root.get("data") : root.get("articles");
             if (items != null && items.isArray()) processItems(items, src);
 
-        } catch (Exception ex) {
-            log.error("Failed to fetch news for {}", src.getName(), ex);
+        } catch (Exception exception) {
+            log.error("Failed to fetch news for {}", src.getName(), exception);
         }
     }
 
@@ -86,8 +86,8 @@ class NewsFetchService {
                 if (link == null || articleService.existsByUrl(link)) return;
                 log.debug("Processing article with url: {} from source: {}", link, src.getName());
                 articleService.save(buildArticle(node, src, link));
-            } catch (Exception e) {
-                log.warn("Skipping article – {}", e.getMessage());
+            } catch (Exception exception) {
+                log.warn("Skipping article – {}", exception.getMessage());
             }
         });
     }
@@ -135,7 +135,7 @@ class NewsFetchService {
                     .map(kv -> URLDecoder.decode(kv[1], StandardCharsets.UTF_8))
                     .findFirst()
                     .orElse(null);
-        } catch (Exception e) {
+        } catch (Exception exception) {
             return null;
         }
     }

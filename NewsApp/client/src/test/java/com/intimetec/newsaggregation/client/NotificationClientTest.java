@@ -83,20 +83,20 @@ class NotificationClientTest {
     void testPublicMethodsExist() {
         try {
             notificationClient.fetchConfig();
-        } catch (Exception e) {
+        } catch (Exception exception) {
             // Expected in test environment without server
         }
         
         ObjectNode node = objectMapper.createObjectNode();
         try {
             notificationClient.saveConfig(node);
-        } catch (Exception e) {
+        } catch (Exception exception) {
             // Expected in test environment without server
         }
         
         try {
             notificationClient.fetchNotifications();
-        } catch (Exception e) {
+        } catch (Exception exception) {
             // Expected in test environment without server
         }
         

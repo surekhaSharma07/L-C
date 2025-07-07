@@ -1,6 +1,7 @@
 package com.intimetec.newsaggregation.handlers;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.intimetec.newsaggregation.client.NotificationClient;
 
@@ -36,11 +37,10 @@ public class NotificationHandler {
                         n.path("createdAt").asText("").replace('T', ' '),
                         n.path("url").asText(""));
             }
-        } catch (Exception e) {
-            System.out.println("Error fetching notifications: " + e.getMessage());
+        } catch (Exception exception) {
+            System.out.println("Error fetching notifications: " + exception.getMessage());
         }
     }
-
 
     public void showNotificationsMenu() {
         while (true) {
@@ -67,7 +67,6 @@ public class NotificationHandler {
         }
     }
 
-
     public void manageNotificationConfig() {
         try {
             JsonNode jsonNode = notificationClient.fetchConfig();
@@ -93,8 +92,8 @@ public class NotificationHandler {
                     default -> System.out.println("Invalid option");
                 }
             }
-        } catch (Exception e) {
-            System.out.println("Error managing notification config: " + e.getMessage());
+        } catch (Exception exception) {
+            System.out.println("Error managing notification config: " + exception.getMessage());
         }
     }
 
@@ -142,14 +141,15 @@ public class NotificationHandler {
                 case "1" -> {
                     System.out.print("Enter keyword: ");
                     String KeywordlowerCase = scanner.nextLine().trim().toLowerCase();
-                    if (!KeywordlowerCase.isBlank() && !keyword.contains(KeywordlowerCase)) keyword.add(KeywordlowerCase);
+                    if (!KeywordlowerCase.isBlank() && !keyword.contains(KeywordlowerCase))
+                        keyword.add(KeywordlowerCase);
                 }
                 case "2" -> {
                     System.out.print("Keyword to remove: ");
                     keyword.remove(scanner.nextLine().trim().toLowerCase());
                 }
                 case "3" -> {
-                    var jsonNodes = new com.fasterxml.jackson.databind.ObjectMapper().createArrayNode();
+                    var jsonNodes = new ObjectMapper().createArrayNode();
                     keyword.forEach(key -> jsonNodes.add(new com.fasterxml.jackson.databind.ObjectMapper().createObjectNode().putNull("id").put("term", key)));
                     ((ObjectNode) jsonNode).set("keywords", jsonNodes);
                     return jsonNode;

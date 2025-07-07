@@ -31,9 +31,6 @@ public class User {
     private List<SavedArticle> saved;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<Like> likes;
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<NotificationConfig> configs;
 
     public User(Long id, String email, String passwordHash, Role role) {

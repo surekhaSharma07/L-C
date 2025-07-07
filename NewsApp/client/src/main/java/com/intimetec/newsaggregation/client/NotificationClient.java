@@ -15,7 +15,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class NotificationClient {
 
-    private static final String PREFS = "http://localhost:8081/api/notify/prefs";
+    private static final String PREFERENCES = "http://localhost:8081/api/notify/prefs";
     private static final String LIST = "http://localhost:8081/api/notify";
 
     private final ObjectMapper mapper;
@@ -24,12 +24,12 @@ public class NotificationClient {
 
 
     public JsonNode fetchConfig() {
-        return sendNoBody("GET", PREFS);
+        return sendNoBody("GET", PREFERENCES);
     }
 
     public JsonNode saveConfig(JsonNode body) {
         String json = body.toPrettyString();
-        return sendJson("PUT", PREFS, json);
+        return sendJson("PUT", PREFERENCES, json);
     }
 
     public List<JsonNode> fetchNotifications() {
@@ -44,26 +44,24 @@ public class NotificationClient {
 
     private JsonNode sendJson(String method, String url, String body) {
         try {
-            HttpRequest.Builder b = HttpRequest.newBuilder(URI.create(url))
+            HttpRequest.Builder builder = HttpRequest.newBuilder(URI.create(url))
                     .header("Authorization", "Bearer " + auth.getJwtToken())
                     .header("Accept", "application/json");
 
             if (body != null) {
-                b.header("Content-Type", "application/json")
+                builder.header("Content-Type", "application/json")
                         .method(method, HttpRequest.BodyPublishers.ofString(body));
             } else {
-                b.method(method, HttpRequest.BodyPublishers.noBody());
+                builder.method(method, HttpRequest.BodyPublishers.noBody());
             }
 
-            HttpResponse<String> resp = client.send(b.build(), HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> resp = client.send(builder.build(), HttpResponse.BodyHandlers.ofString());
             if (resp.statusCode() / 100 != 2) {
                 throw new NetworkException("Failed – HTTP " + resp.statusCode() + " → " + resp.body(), resp.statusCode());
             }
             return mapper.readTree(resp.body());
-        } catch (NetworkException e) {
-            throw e;
-        } catch (Exception ex) {
-            throw new NetworkException("Network error while accessing notifications", ex);
+        } catch (Exception exception) {
+            throw new NetworkException("Network error while accessing notifications", exception);
         }
     }
 }

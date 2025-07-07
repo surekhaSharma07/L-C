@@ -17,8 +17,8 @@ public final class TestHelper {
             java.lang.reflect.Method methodRef = client.getClass().getDeclaredMethod("createHttpRequest", String.class, String.class, String.class);
             methodRef.setAccessible(true);
             return (HttpRequest) methodRef.invoke(client, method, path, body);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to create HTTP request", e);
+        } catch (Exception exception) {
+            throw new RuntimeException("Failed to create HTTP request", exception);
         }
     }
 
@@ -39,8 +39,8 @@ public final class TestHelper {
             java.lang.reflect.Method method = client.getClass().getDeclaredMethod("trimLeadingWhitespace", String.class);
             method.setAccessible(true);
             return (String) method.invoke(client, text);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to trim whitespace", e);
+        } catch (Exception exception) {
+            throw new RuntimeException("Failed to trim whitespace", exception);
         }
     }
 
@@ -55,8 +55,8 @@ public final class TestHelper {
             java.lang.reflect.Method method = client.getClass().getDeclaredMethod("createPostRequest", String.class, String.class);
             method.setAccessible(true);
             return (HttpRequest) method.invoke(client, url, body);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to create POST request", e);
+        } catch (Exception exception) {
+            throw new RuntimeException("Failed to create POST request", exception);
         }
     }
 
@@ -64,16 +64,16 @@ public final class TestHelper {
         try {
             return mapper.convertValue(mapper.readTree(jsonArray), 
                 new TypeReference<List<JsonNode>>() {});
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to parse notifications", e);
+        } catch (Exception exception) {
+            throw new RuntimeException("Failed to parse notifications", exception);
         }
     }
 
     public static JsonNode parseJson(ObjectMapper mapper, String jsonString) {
         try {
             return mapper.readTree(jsonString);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to parse JSON", e);
+        } catch (Exception exception) {
+            throw new RuntimeException("Failed to parse JSON", exception);
         }
     }
 } 

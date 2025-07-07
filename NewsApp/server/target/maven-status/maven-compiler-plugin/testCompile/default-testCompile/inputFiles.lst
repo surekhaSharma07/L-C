@@ -1,0 +1,12 @@
+D:\L&C\NewsApp\server\src\test\java\com\intimetec\newsaggreation\config\AppConfigTest.java
+D:\L&C\NewsApp\server\src\test\java\com\intimetec\newsaggreation\config\JwtAuthenticationFilterTest.java
+D:\L&C\NewsApp\server\src\test\java\com\intimetec\newsaggreation\config\JwtUtilTest.java
+D:\L&C\NewsApp\server\src\test\java\com\intimetec\newsaggreation\config\SecurityConfigTest.java
+D:\L&C\NewsApp\server\src\test\java\com\intimetec\newsaggreation\service\ArticleServiceImplTest.java
+D:\L&C\NewsApp\server\src\test\java\com\intimetec\newsaggreation\service\CategoryServiceImplTest.java
+D:\L&C\NewsApp\server\src\test\java\com\intimetec\newsaggreation\service\EmailServiceImplTest.java
+D:\L&C\NewsApp\server\src\test\java\com\intimetec\newsaggreation\service\NotificationConfigServiceImplTest.java
+D:\L&C\NewsApp\server\src\test\java\com\intimetec\newsaggreation\service\NotificationServiceImplTest.java
+D:\L&C\NewsApp\server\src\test\java\com\intimetec\newsaggreation\service\UserArticleServiceImplTest.java
+D:\L&C\NewsApp\server\src\test\java\com\intimetec\newsaggreation\service\UserServiceImplTest.java
+D:\L&C\NewsApp\server\src\test\java\com\intimetec\newsaggreation\util\NotificationConfigFactoryTest.java

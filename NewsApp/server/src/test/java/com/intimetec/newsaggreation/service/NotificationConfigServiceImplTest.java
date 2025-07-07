@@ -2,7 +2,6 @@ package com.intimetec.newsaggreation.service;
 
 import com.intimetec.newsaggreation.dto.KeywordDto;
 import com.intimetec.newsaggreation.dto.NotificationConfigDto;
-import com.intimetec.newsaggreation.mapper.NotificationMapper;
 import com.intimetec.newsaggreation.model.Keyword;
 import com.intimetec.newsaggreation.model.NotificationConfig;
 import com.intimetec.newsaggreation.model.User;
@@ -14,7 +13,6 @@ import com.intimetec.newsaggreation.util.NotificationConfigFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -33,7 +31,7 @@ class NotificationConfigServiceImplTest {
     @InjectMocks NotificationConfigServiceImpl service;
 
     User user;
-    NotificationConfig config;
+    NotificationConfig notificationConfig;
     NotificationConfigDto configDto;
     KeywordDto keywordDto;
     Keyword keyword;
@@ -47,13 +45,13 @@ class NotificationConfigServiceImplTest {
         keyword = new Keyword();
         keyword.setId(10L);
         keyword.setTerm("java");
-        config = NotificationConfigFactory.createDefault(user);
-        config.setId(100L);
-        config.setBusiness(true);
-        config.setEntertainment(false);
-        config.setSports(true);
-        config.setTechnology(false);
-        config.setKeywords(new HashSet<>(List.of(keyword)));
+        notificationConfig = NotificationConfigFactory.createDefault(user);
+        notificationConfig.setId(100L);
+        notificationConfig.setBusiness(true);
+        notificationConfig.setEntertainment(false);
+        notificationConfig.setSports(true);
+        notificationConfig.setTechnology(false);
+        notificationConfig.setKeywords(new HashSet<>(List.of(keyword)));
         configDto = new NotificationConfigDto(
                 true, false, true, false, List.of(keywordDto)
         );
@@ -62,7 +60,7 @@ class NotificationConfigServiceImplTest {
     @Test
     void getCurrentUserConfigByEmail_success_existingConfig() {
         when(userRepo.findByEmail("user@example.com")).thenReturn(Optional.of(user));
-        when(configRepo.findByUserId(1L)).thenReturn(Optional.of(config));
+        when(configRepo.findByUserId(1L)).thenReturn(Optional.of(notificationConfig));
         NotificationConfigDto result = service.getCurrentUserConfigByEmail("user@example.com");
         assertNotNull(result);
         assertTrue(result.business());
@@ -84,15 +82,15 @@ class NotificationConfigServiceImplTest {
     @Test
     void getCurrentUserConfigByEmail_userNotFound() {
         when(userRepo.findByEmail("user@example.com")).thenReturn(Optional.empty());
-        RuntimeException ex = assertThrows(RuntimeException.class, () ->
+        RuntimeException exception = assertThrows(RuntimeException.class, () ->
             service.getCurrentUserConfigByEmail("user@example.com")
         );
-        assertEquals("User not found", ex.getMessage());
+        assertEquals("User not found", exception.getMessage());
     }
 
     @Test
     void getCurrentUserConfig_success() {
-        when(configRepo.findByUserId(1L)).thenReturn(Optional.of(config));
+        when(configRepo.findByUserId(1L)).thenReturn(Optional.of(notificationConfig));
         NotificationConfigDto result = service.getCurrentUserConfig(1L);
         assertNotNull(result);
         assertTrue(result.business());
@@ -102,10 +100,10 @@ class NotificationConfigServiceImplTest {
     @Test
     void getCurrentUserConfig_configNotFound() {
         when(configRepo.findByUserId(1L)).thenReturn(Optional.empty());
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
             service.getCurrentUserConfig(1L)
         );
-        assertEquals("Config not found", ex.getMessage());
+        assertEquals("Config not found", exception.getMessage());
     }
 
     @Test
@@ -137,9 +135,9 @@ class NotificationConfigServiceImplTest {
     @Test
     void updateConfig_configNotFound() {
         when(configRepo.findByUserId(1L)).thenReturn(Optional.empty());
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
             service.updateConfig(1L, configDto)
         );
-        assertEquals("Config not found", ex.getMessage());
+        assertEquals("Config not found", exception.getMessage());
     }
 } 

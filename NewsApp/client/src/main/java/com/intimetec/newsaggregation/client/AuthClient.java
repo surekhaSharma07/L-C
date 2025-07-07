@@ -24,7 +24,6 @@ public class AuthClient {
         this.httpClient = createHttpClient();
     }
 
-
     private HttpClient createHttpClient() {
         return HttpClient.newBuilder()
                 .cookieHandler(new CookieManager(null, CookiePolicy.ACCEPT_ALL))
@@ -38,25 +37,24 @@ public class AuthClient {
         return mapper.writeValueAsString(requestNode);
     }
 
-    public boolean signup(String email, String password) throws AuthenticationException, NetworkException {
+
+    public boolean signup(String email, String password) throws NetworkException {
         try {
             JsonNode requestNode = mapper.createObjectNode()
                     .put("email", email)
                     .put("password", password);
             String requestBody = mapper.writeValueAsString(requestNode);
-            HttpRequest request = createPostRequest(BASE_URL + "/signup", requestBody);
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(BASE_URL + "/signup"))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(requestBody))
+                    .build();
 
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-
-            if (response.statusCode() == 200) {
-                return true;
-            } else {
-                throw new AuthenticationException("Signup failed with status: " + response.statusCode());
-            }
-        } catch (AuthenticationException authenticationException) {
-            throw authenticationException;
+            return response.statusCode() == 200;
         } catch (Exception exception) {
-            throw new NetworkException("Network error during signup", exception);
+            throw new NetworkException("Signup failed due to network error or server issue", exception);
         }
     }
 
@@ -71,8 +69,6 @@ public class AuthClient {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
             return processLoginResponse(response);
-        } catch (AuthenticationException authenticationException) {
-            throw authenticationException;
         } catch (Exception exception) {
             throw new NetworkException("Network error during login", exception);
         }
@@ -93,8 +89,8 @@ public class AuthClient {
                 this.jwtToken = root.path("token").asText(null);
                 this.role = root.path("role").asText(null);
                 return jwtToken != null;
-            } catch (Exception e) {
-                throw new Exception("Failed to parse login response", e);
+            } catch (Exception exception) {
+                throw new Exception("Failed to parse login response", exception);
             }
         } else {
             throw new AuthenticationException("Login failed with status: " + response.statusCode());

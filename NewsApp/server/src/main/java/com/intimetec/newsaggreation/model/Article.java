@@ -49,8 +49,6 @@ public class Article {
     @OneToMany(mappedBy = "news", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SavedArticle> savedBy;
 
-    @OneToMany(mappedBy = "news", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Like> likedBy;
 
     @ManyToMany
     @JoinTable(

@@ -104,8 +104,8 @@ class NewsClientTest {
             java.lang.reflect.Method method = NewsClient.class.getDeclaredMethod("buildDateRangeUrl", LocalDate.class, LocalDate.class);
             method.setAccessible(true);
             return (String) method.invoke(client, from, to);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        } catch (Exception exception) {
+            throw new RuntimeException(exception);
         }
     }
 
@@ -114,8 +114,8 @@ class NewsClientTest {
             java.lang.reflect.Method method = NewsClient.class.getDeclaredMethod("buildDateCategoryUrl", LocalDate.class, String.class);
             method.setAccessible(true);
             return (String) method.invoke(client, date, category);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        } catch (Exception exception) {
+            throw new RuntimeException(exception);
         }
     }
 
@@ -124,8 +124,8 @@ class NewsClientTest {
             java.lang.reflect.Method method = NewsClient.class.getDeclaredMethod("buildSearchUrl", String.class, LocalDate.class, LocalDate.class);
             method.setAccessible(true);
             return (String) method.invoke(client, query, from, to);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        } catch (Exception exception) {
+            throw new RuntimeException(exception);
         }
     }
 
@@ -134,8 +134,8 @@ class NewsClientTest {
             java.lang.reflect.Method method = NewsClient.class.getDeclaredMethod("createGetRequest", String.class);
             method.setAccessible(true);
             return (HttpRequest) method.invoke(client, url);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        } catch (Exception exception) {
+            throw new RuntimeException(exception);
         }
     }
 } 

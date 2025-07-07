@@ -21,7 +21,6 @@ public class AuthenticationHandler {
             if (email == null) {
                 return false;
             }
-
             System.out.print("Password : ");
             String password = getPassword();
 
@@ -34,11 +33,11 @@ public class AuthenticationHandler {
                     ("ADMIN".equalsIgnoreCase(authClient.getRole()) ? " (ADMIN)" : ""));
             return true;
 
-        } catch (AuthenticationException e) {
-            System.out.println("Authentication error: " + e.getMessage());
+        } catch (AuthenticationException exception) {
+            System.out.println("Authentication error: " + exception.getMessage());
             return false;
-        } catch (Exception e) {
-            System.out.println("Login error: " + e.getMessage());
+        } catch (Exception exception) {
+            System.out.println("Login error: " + exception.getMessage());
             return false;
         }
     }
@@ -60,10 +59,8 @@ public class AuthenticationHandler {
                 System.out.println("Signup failed");
             }
 
-        } catch (AuthenticationException e) {
-            System.out.println("Authentication error: " + e.getMessage());
-        } catch (Exception e) {
-            System.out.println("Signup error: " + e.getMessage());
+        } catch (Exception exception) {
+            System.out.println("Signup error: " + exception.getMessage());
         }
     }
 
@@ -90,7 +87,7 @@ public class AuthenticationHandler {
                     password.append((char) ch);
                 }
             }
-        } catch (Exception e) {
+        } catch (Exception exception) {
             return getPasswordFallback();
         }
 
@@ -102,7 +99,7 @@ public class AuthenticationHandler {
         try {
             String input = scanner.nextLine();
             return input.trim();
-        } catch (Exception e) {
+        } catch (Exception exception) {
             return "";
         }
     }
@@ -128,7 +125,6 @@ public class AuthenticationHandler {
         if (email == null || email.isEmpty()) {
             return false;
         }
-        // Simple but effective RFC 5322-compatible regex
         String regex = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
         return email.matches(regex);
     }

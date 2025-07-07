@@ -77,16 +77,15 @@ public class NewsClient {
         try {
             HttpRequest request = createGetRequest(url);
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            
+
             validateResponse(response);
             return parseJsonArray(response.body());
-        } catch (NetworkException e) {
-            throw new Exception(e.getMessage(), e);
-        } catch (Exception e) {
-            throw e;
+        } catch (NetworkException exception) {
+            throw new Exception(exception.getMessage(), exception);
+        } catch (Exception exception) {
+            throw exception;
         }
     }
-
 
     private HttpRequest createGetRequest(String url) {
         return HttpRequest.newBuilder()
@@ -105,6 +104,7 @@ public class NewsClient {
 
     private List<JsonNode> parseJsonArray(String responseBody) throws Exception {
         JsonNode tree = mapper.readTree(responseBody);
-        return mapper.convertValue(tree, new TypeReference<>() {});
+        return mapper.convertValue(tree, new TypeReference<>() {
+        });
     }
 }

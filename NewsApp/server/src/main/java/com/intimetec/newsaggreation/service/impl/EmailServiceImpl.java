@@ -1,4 +1,3 @@
-// src/main/java/com/intimetec/newsaggreation/service/impl/EmailServiceImpl.java
 package com.intimetec.newsaggreation.service.impl;
 
 import com.intimetec.newsaggreation.service.EmailService;
@@ -17,13 +16,13 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void send(String to, String subject, String body) {
-        log.info("Sending email to {} with subject", to);
+        log.info("Sending email to {}", to);
         try {
-            SimpleMailMessage msg = new SimpleMailMessage();
-            msg.setTo(to);
-            msg.setSubject(subject);
-            msg.setText(body);
-            mailSender.send(msg);
+            SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
+            simpleMailMessage.setTo(to);
+            simpleMailMessage.setSubject(subject);
+            simpleMailMessage.setText(body);
+            mailSender.send(simpleMailMessage);
             log.info("Email sent to {}", to);
         } catch (Exception exception) {
             log.error("Failed to send email to {}: {}", to, exception.getMessage(), exception);

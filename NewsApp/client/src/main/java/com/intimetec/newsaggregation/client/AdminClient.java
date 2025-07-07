@@ -1,10 +1,9 @@
 package com.intimetec.newsaggregation.client;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
+import com.intimetec.newsaggregation.dto.ApiSourceDto;
+import com.intimetec.newsaggregation.dto.ReportDto;
 
 import java.util.Map;
 
@@ -12,7 +11,7 @@ public class AdminClient {
 
     private final String baseUrl;
     private final String jwt;
-    private final RestTemplate rest = new RestTemplate();
+    private final RestTemplate restTemplate = new RestTemplate();
 
     public AdminClient(String baseUrl, String jwt) {
         this.baseUrl = baseUrl;
@@ -61,48 +60,26 @@ public class AdminClient {
         try {
             return exchange("/api/admin/articles/visibility/reports/" + articleId,
                     HttpMethod.GET, null, ReportDto[].class);
-        } catch (Exception e) {
-            if (e.getMessage().contains("LocalDateTime")) {
+        } catch (Exception exception) {
+            if (exception.getMessage().contains("LocalDateTime")) {
                 System.out.println("Server serialization issue detected. Reports feature temporarily unavailable.");
                 return new ReportDto[0];
             }
-            throw e;
+            throw exception;
         }
     }
-
 
     private void postNoBody(String path) {
         exchange(path, HttpMethod.POST, null, Void.class);
     }
 
     private <T> T exchange(String path, HttpMethod method, Object body, Class<T> type) {
-        HttpHeaders hdr = new HttpHeaders();
-        hdr.setBearerAuth(jwt);
-        hdr.setContentType(MediaType.APPLICATION_JSON);
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setBearerAuth(jwt);
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
 
-        HttpEntity<?> entity = body == null ? new HttpEntity<>(hdr) : new HttpEntity<>(body, hdr);
-        ResponseEntity<T> resp = rest.exchange(baseUrl + path, method, entity, type);
+        HttpEntity<?> entity = body == null ? new HttpEntity<>(httpHeaders) : new HttpEntity<>(body, httpHeaders);
+        ResponseEntity<T> resp = restTemplate.exchange(baseUrl + path, method, entity, type);
         return resp.getBody();
-    }
-
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class ApiSourceDto {
-        private Integer id;
-        private String name;
-        private String endpointUrl;
-        private String apiKey;
-        private Integer pollingFreq;
-        private String status;
-    }
-
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class ReportDto {
-        private String userEmail;
-        private String reportedAt;
-        private String reason;
     }
 }

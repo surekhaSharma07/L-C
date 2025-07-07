@@ -80,10 +80,10 @@ public class UserArticleClient {
             validateResponse(response);
             return parseResponse(response.body());
             
-        } catch (NetworkException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new NetworkException("HTTP request failed: " + e.getMessage(), e);
+        } catch (NetworkException networkException) {
+            throw networkException;
+        } catch (Exception exception) {
+            throw new NetworkException("HTTP request failed: " + exception.getMessage(), exception);
         }
     }
 
