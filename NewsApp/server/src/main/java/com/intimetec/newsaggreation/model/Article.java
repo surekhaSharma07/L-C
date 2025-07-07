@@ -28,21 +28,12 @@ public class Article {
 
     private LocalDateTime publishedAt;
 
-    /* ---------- NEW MODERATION FIELDS ---------- */
-    /**
-     * true = hidden from all public endpoints
-     */
     @Column(nullable = false)
     private boolean hidden = false;
 
-    /**
-     * total reports so far (admin can see this)
-     */
     @Column(nullable = false)
     private int reportCount = 0;
-    /* ------------------------------------------- */
 
-    /* existing relationships … */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private Category primaryCategory;

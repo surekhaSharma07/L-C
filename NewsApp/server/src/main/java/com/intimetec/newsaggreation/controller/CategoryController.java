@@ -13,36 +13,36 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/categories")
 public class CategoryController {
-    private final CategoryService svc;
+    private final CategoryService categoryService;
 
-    public CategoryController(CategoryService svc) {
-        this.svc = svc;
+    public CategoryController(CategoryService categoryService) {
+        this.categoryService = categoryService;
     }
 
     @GetMapping
     public List<Category> all() {
-        return svc.findAll();
+        return categoryService.findAll();
     }
 
     @GetMapping("/{id}")
     public Category one(@PathVariable Integer id) {
-        return svc.findById(id);
+        return categoryService.findById(id);
     }
 
     @PostMapping
     public Category create(@RequestBody Category cat) {
-        return svc.create(cat);
+        return categoryService.create(cat);
     }
 
     @PutMapping("/{id}")
     public Category update(@PathVariable Integer id,
                            @RequestBody Category cat) {
-        return svc.update(id, cat);
+        return categoryService.update(id, cat);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable Integer id) {
-        svc.delete(id);
+        categoryService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
@@ -50,8 +50,8 @@ public class CategoryController {
     @PreAuthorize("hasRole('ADMIN')")
     public Category addCategoryAdmin(@Valid @RequestBody Map<String, String> body) {
         String name = body.get("name");
-        Category cat = new Category();
-        cat.setName(name);
-        return svc.create(cat);
+        Category category = new Category();
+        category.setName(name);
+        return categoryService.create(category);
     }
 }

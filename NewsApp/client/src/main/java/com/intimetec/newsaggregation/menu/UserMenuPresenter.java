@@ -1,4 +1,3 @@
-// menu/UserMenuPresenter.java
 package com.intimetec.newsaggregation.menu;
 
 import com.intimetec.newsaggregation.app.ConsoleMenu;

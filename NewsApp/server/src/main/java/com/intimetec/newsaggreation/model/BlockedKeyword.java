@@ -10,9 +10,10 @@ import lombok.*;
 @Table(name = "blocked_keywords")
 public class BlockedKeyword {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false, unique = true, length = 120)
-    private String term;          // always stored lowercase
+    private String term;
 }

@@ -51,7 +51,6 @@ class UserServiceImplTest {
 
     @Test
     void testRegister_Success() {
-        // Arrange
         String email = "newuser@example.com";
         String rawPassword = "password123";
 
@@ -62,10 +61,8 @@ class UserServiceImplTest {
             return user;
         });
 
-        // Act
         User result = userService.register(email, rawPassword);
 
-        // Assert
         assertNotNull(result);
         assertEquals(email, result.getEmail());
         assertTrue(realEncoder.matches(rawPassword, result.getPasswordHash()));
@@ -78,15 +75,13 @@ class UserServiceImplTest {
 
     @Test
     void testRegister_WhenUserRoleNotFound() {
-        // Arrange
         String email = "newuser@example.com";
         String rawPassword = "password123";
 
         when(roleRepository.findByName("USER")).thenReturn(Optional.empty());
 
-        // Act & Assert
         IllegalStateException exception = assertThrows(IllegalStateException.class, () ->
-            userService.register(email, rawPassword)
+                userService.register(email, rawPassword)
         );
 
         assertEquals("Default role USER not found", exception.getMessage());
@@ -94,52 +89,13 @@ class UserServiceImplTest {
         verify(userRepository, never()).save(any(User.class));
     }
 
-//    @Test
-//    void testRegister_WithNullEmail() {
-//        // Arrange
-//        String email = null;
-//        String rawPassword = "password123";
-//
-//        when(roleRepository.findByName("USER")).thenReturn(Optional.of(userRole));
-//        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
-//
-//        // Act
-//        User result = userService.register(email, rawPassword);
-//
-//        // Assert
-//        assertNotNull(result);
-//        assertNull(result.getEmail());
-//        verify(userRepository).save(any(User.class));
-//    }
-
-//    @Test
-//    void testRegister_WithEmptyPassword() {
-//        // Arrange
-//        String email = "test@example.com";
-//        String rawPassword = "";
-//
-//        when(roleRepository.findByName("USER")).thenReturn(Optional.of(userRole));
-//        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
-//
-//        // Act
-//        User result = userService.register(email, rawPassword);
-//
-//        // Assert
-//        assertNotNull(result);
-//        assertTrue(realEncoder.matches(rawPassword, result.getPasswordHash()));
-//        verify(userRepository).save(any(User.class));
-//    }
-
     @Test
     void testFindByEmail_Success() {
-        // Arrange
         String email = "test@example.com";
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(testUser));
 
-        // Act
         User result = userService.findByEmail(email);
 
-        // Assert
         assertNotNull(result);
         assertEquals(email, result.getEmail());
         assertEquals(testUser.getId(), result.getId());
@@ -148,13 +104,11 @@ class UserServiceImplTest {
 
     @Test
     void testFindByEmail_WhenUserNotFound() {
-        // Arrange
         String email = "nonexistent@example.com";
         when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
-        // Act & Assert
         UsernameNotFoundException exception = assertThrows(UsernameNotFoundException.class, () ->
-            userService.findByEmail(email)
+                userService.findByEmail(email)
         );
 
         assertEquals("User not found", exception.getMessage());
@@ -163,13 +117,11 @@ class UserServiceImplTest {
 
     @Test
     void testFindByEmail_WithNullEmail() {
-        // Arrange
         String email = null;
         when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
-        // Act & Assert
         UsernameNotFoundException exception = assertThrows(UsernameNotFoundException.class, () ->
-            userService.findByEmail(email)
+                userService.findByEmail(email)
         );
 
         assertEquals("User not found", exception.getMessage());
@@ -178,13 +130,11 @@ class UserServiceImplTest {
 
     @Test
     void testFindByEmail_WithEmptyEmail() {
-        // Arrange
         String email = "";
         when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
-        // Act & Assert
         UsernameNotFoundException exception = assertThrows(UsernameNotFoundException.class, () ->
-            userService.findByEmail(email)
+                userService.findByEmail(email)
         );
 
         assertEquals("User not found", exception.getMessage());
@@ -193,7 +143,6 @@ class UserServiceImplTest {
 
     @Test
     void testRegister_VerifyPasswordEncryption() {
-        // Arrange
         String email = "test@example.com";
         String rawPassword = "myPassword123";
 
@@ -204,17 +153,13 @@ class UserServiceImplTest {
             return user;
         });
 
-        // Act
         User result = userService.register(email, rawPassword);
 
-        // Assert
         assertTrue(realEncoder.matches(rawPassword, result.getPasswordHash()));
-        // No need to verify passwordEncoder mock
     }
 
     @Test
     void testRegister_VerifyUserRoleAssignment() {
-        // Arrange
         String email = "test@example.com";
         String rawPassword = "password123";
         Role expectedRole = new Role();
@@ -228,10 +173,8 @@ class UserServiceImplTest {
             return user;
         });
 
-        // Act
         User result = userService.register(email, rawPassword);
 
-        // Assert
         assertEquals(expectedRole, result.getRole());
         verify(roleRepository).findByName("USER");
     }

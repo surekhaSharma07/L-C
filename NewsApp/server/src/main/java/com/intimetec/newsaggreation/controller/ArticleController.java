@@ -7,12 +7,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/news")
+@Slf4j
 public class ArticleController {
     private final ArticleService service;
 
@@ -22,6 +24,7 @@ public class ArticleController {
 
     @GetMapping
     public List<ArticleResponse> all() {
+        log.info("GET /api/news");
         return service.findAll().stream()
                 .map(ArticleResponse::from)
                 .toList();
@@ -32,6 +35,7 @@ public class ArticleController {
             @RequestParam(name = "date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
             @RequestParam(name = "category") String category
     ) {
+        log.info("GET /api/news?date={}&category={}", date, category);
         return service.findByDateAndCategory(date, category).stream()
                 .map(ArticleResponse::from)
                 .toList();
@@ -42,6 +46,7 @@ public class ArticleController {
             @RequestParam(name = "from") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
             @RequestParam(name = "to") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to
     ) {
+        log.info("GET /api/news?from={}&to={}", from, to);
         return service.findByDateRange(from, to).stream()
                 .map(ArticleResponse::from)
                 .toList();
@@ -53,6 +58,7 @@ public class ArticleController {
             @RequestParam(name = "to") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
             @RequestParam(name = "category") String category
     ) {
+        log.info("GET /api/news?from={}&to={}&category={}", from, to, category);
         return service.findByDateRangeAndCategory(from, to, category).stream()
                 .map(ArticleResponse::from)
                 .toList();
@@ -60,6 +66,7 @@ public class ArticleController {
 
     @GetMapping("/today")
     public List<ArticleResponse> today() {
+        log.info("GET /api/news/today");
         return service.findToday().stream()
                 .map(ArticleResponse::from)
                 .toList();
@@ -67,6 +74,7 @@ public class ArticleController {
 
     @GetMapping("/{id}")
     public ArticleResponse byId(@PathVariable Long id) {
+        log.info("GET /api/news/{}", id);
         return ArticleResponse.from(service.findById(id));
     }
 
@@ -74,7 +82,7 @@ public class ArticleController {
     public ResponseEntity<List<ArticleResponse>> searchArticles(
             @RequestParam("query") String query,
             @AuthenticationPrincipal UserDetails principal) {
-
+        log.info("GET /api/news/search?query={}", query);
         List<ArticleResponse> result = service.search(query)
                 .stream()
                 .map(ArticleResponse::from)

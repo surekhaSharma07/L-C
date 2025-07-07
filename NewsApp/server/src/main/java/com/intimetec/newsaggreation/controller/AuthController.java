@@ -26,40 +26,29 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<AuthResponse> signup(@RequestBody AuthRequest req) {
-        User user = userService.register(req.getEmail(), req.getPassword());
+    public ResponseEntity<AuthResponse> signup(@RequestBody AuthRequest authRequest) {
+        User user = userService.register(authRequest.getEmail(), authRequest.getPassword());
+        String roleName = user.getRole().getName();
+        String token = jwtUtil.generateToken(user.getEmail(), roleName);
 
-        /* 1️⃣  Get the role name here */
-        String roleName = user.getRole().getName();   // "ADMIN" or "USER"
-
-        /* 2️⃣  Generate a token that also carries the role (optional but useful) */
-        String token = jwtUtil.generateToken(user.getEmail(), roleName);  // ← use the 2‑arg overload
-
-        /* 3️⃣  Return it in AuthResponse so the client can read it */
         return ResponseEntity.ok(
                 new AuthResponse(user.getId(), user.getEmail(), token, roleName)
         );
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest req) {
-        User user = userService.findByEmail(req.getEmail());
-        if (!encoder.matches(req.getPassword(), user.getPasswordHash())) {
+    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest authRequest) {
+        User user = userService.findByEmail(authRequest.getEmail());
+        if (!encoder.matches(authRequest.getPassword(), user.getPasswordHash())) {
             throw new BadCredentialsException("Invalid credential");
         }
 
-        /* 1️⃣  Same role extraction */
         String roleName = user.getRole().getName();
-
-        /* 2️⃣  Token with role (optional) */
         String token = jwtUtil.generateToken(user.getEmail(), roleName);
 
-        /* 3️⃣  Include role in the response */
         return ResponseEntity.ok(
                 new AuthResponse(user.getId(), user.getEmail(), token, roleName)
         );
     }
-
-
 }
 

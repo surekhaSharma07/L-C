@@ -1,17 +1,10 @@
 package com.intimetec.newsaggregation.handlers;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.intimetec.newsaggregation.client.AdminClient;
 import com.intimetec.newsaggregation.client.AdminClient.ApiSourceDto;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Scanner;
 
-/**
- * Handles admin operations (view reports, manage API sources).
- * Extracted from ConsoleMenu to follow Single Responsibility Principle.
- */
 public class AdminHandler {
 
     private AdminClient adminClient;
@@ -22,9 +15,6 @@ public class AdminHandler {
         this.scanner = scanner;
     }
 
-    /**
-     * Updates the AdminClient with current JWT token.
-     */
     public void updateAdminClient(String jwtToken, String baseUrl) {
         if (jwtToken != null && !jwtToken.trim().isEmpty()) {
             this.adminClient = new AdminClient(baseUrl, jwtToken);
@@ -33,9 +23,6 @@ public class AdminHandler {
         }
     }
 
-    /**
-     * Displays article reports.
-     */
     public void displayArticleReports() {
         try {
             long articleId = getArticleIdFromUser();
@@ -55,17 +42,12 @@ public class AdminHandler {
         }
     }
 
-    /**
-     * Gets article ID from user input.
-     */
     private long getArticleIdFromUser() {
         System.out.print("Enter article ID to view reports: ");
         return Long.parseLong(scanner.nextLine().trim());
     }
 
-    /**
-     * Displays the list of reports for an article.
-     */
+
     private void displayReportsList(AdminClient.ReportDto[] reports) {
         System.out.println("\nARTICLE REPORTS (" + reports.length + ")");
         for (AdminClient.ReportDto report : reports) {
@@ -76,9 +58,6 @@ public class AdminHandler {
         }
     }
 
-    /**
-     * Views external servers and their status.
-     */
     public void viewExternalServers() {
         try {
             ApiSourceDto[] list = adminClient.listApiSources();
@@ -91,9 +70,6 @@ public class AdminHandler {
         }
     }
 
-    /**
-     * Views detailed information about external servers.
-     */
     public void viewExternalServerDetails() {
         try {
             System.out.print("Server id: ");
@@ -120,9 +96,6 @@ public class AdminHandler {
         }
     }
 
-    /**
-     * Adds or edits external servers.
-     */
     public void addEditExternalServer() {
         try {
             ApiSourceDto dto = new ApiSourceDto();
@@ -146,9 +119,6 @@ public class AdminHandler {
         }
     }
 
-    /**
-     * Adds a new news category.
-     */
     public void addNewsCategory() {
         try {
             System.out.print("New category name: ");
@@ -159,10 +129,6 @@ public class AdminHandler {
         }
     }
 
-
-    /**
-     * Manages article moderation.
-     */
     public void manageArticleModeration() {
         while (true) {
             System.out.print("""    

@@ -8,4 +8,5 @@ public record NotificationConfigDto(
         boolean sports,
         boolean technology,
         List<KeywordDto> keywords
-) { }
+) {
+}

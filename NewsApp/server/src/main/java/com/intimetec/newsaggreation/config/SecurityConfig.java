@@ -12,9 +12,11 @@ import org.springframework.security.crypto.bcrypt.*;
 
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import lombok.extern.slf4j.Slf4j;
 
 @Configuration
 @EnableWebSecurity
+@Slf4j
 public class SecurityConfig {
     private final JwtAuthenticationFilter jwtFilter;
 
@@ -24,6 +26,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        log.info("Security configuration initialized: authentication and authorization rules are active.");
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
@@ -32,8 +35,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/user/**").hasAnyRole("USER", "ADMIN")
                         .anyRequest().authenticated()
                 )
-                .sessionManagement(sess ->
-                        sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .sessionManagement(configurer ->
+                        configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .addFilterBefore(jwtFilter,
                         UsernamePasswordAuthenticationFilter.class);
@@ -43,13 +46,15 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationManager authenticationManager(
-            AuthenticationConfiguration cfg
+            AuthenticationConfiguration authenticationConfiguration
     ) throws Exception {
-        return cfg.getAuthenticationManager();
+        log.info("Authentication manager is ready for login operations.");
+        return authenticationConfiguration.getAuthenticationManager();
     }
 
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
+        log.info("Password encryption is enabled for user accounts.");
         return new BCryptPasswordEncoder();
     }
 }

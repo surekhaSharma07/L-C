@@ -73,14 +73,13 @@ class NotificationServiceImplTest {
         notification3 = new Notification();
         notification3.setId(3L);
         notification3.setUser(testUser);
-        notification3.setNewsId(999L); // Non-existent article
+        notification3.setNewsId(999L);
         notification3.setType("ALERT");
         notification3.setSentAt(LocalDateTime.now().minusHours(3));
     }
 
     @Test
     void testFindByUserEmail_Success() {
-        // Arrange
         String email = "test@example.com";
         List<Notification> notifications = Arrays.asList(notification1, notification2);
 
@@ -89,10 +88,8 @@ class NotificationServiceImplTest {
         when(articleRepository.findById(1L)).thenReturn(Optional.of(testArticle));
         when(articleRepository.findById(2L)).thenReturn(Optional.of(testArticle));
 
-        // Act
         List<NotificationDto> result = notificationService.findByUserEmail(email);
 
-        // Assert
         assertNotNull(result);
         assertEquals(2, result.size());
         assertEquals(1L, result.get(0).id());
@@ -108,11 +105,9 @@ class NotificationServiceImplTest {
 
     @Test
     void testFindByUserEmail_WhenUserNotFound() {
-        // Arrange
         String email = "nonexistent@example.com";
         when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
-        // Act & Assert
         RuntimeException exception = assertThrows(RuntimeException.class, () ->
             notificationService.findByUserEmail(email)
         );
@@ -125,7 +120,6 @@ class NotificationServiceImplTest {
 
     @Test
     void testFindByUserEmail_WithDeletedArticle() {
-        // Arrange
         String email = "test@example.com";
         List<Notification> notifications = Arrays.asList(notification3); // Notification with non-existent article
 
@@ -133,10 +127,8 @@ class NotificationServiceImplTest {
         when(notificationRepository.findByUserOrderBySentAtDesc(testUser)).thenReturn(notifications);
         when(articleRepository.findById(999L)).thenReturn(Optional.empty());
 
-        // Act
         List<NotificationDto> result = notificationService.findByUserEmail(email);
 
-        // Assert
         assertNotNull(result);
         assertEquals(1, result.size());
         assertEquals(3L, result.get(0).id());
@@ -152,17 +144,14 @@ class NotificationServiceImplTest {
 
     @Test
     void testFindByUserEmail_EmptyNotifications() {
-        // Arrange
         String email = "test@example.com";
         List<Notification> notifications = Arrays.asList();
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(testUser));
         when(notificationRepository.findByUserOrderBySentAtDesc(testUser)).thenReturn(notifications);
 
-        // Act
         List<NotificationDto> result = notificationService.findByUserEmail(email);
 
-        // Assert
         assertNotNull(result);
         assertTrue(result.isEmpty());
         verify(userRepository).findByEmail(email);
@@ -172,7 +161,6 @@ class NotificationServiceImplTest {
 
     @Test
     void testFindByUserEmail_MixedArticles() {
-        // Arrange
         String email = "test@example.com";
         List<Notification> notifications = Arrays.asList(notification1, notification3); // One with article, one without
 
@@ -181,18 +169,14 @@ class NotificationServiceImplTest {
         when(articleRepository.findById(1L)).thenReturn(Optional.of(testArticle));
         when(articleRepository.findById(999L)).thenReturn(Optional.empty());
 
-        // Act
         List<NotificationDto> result = notificationService.findByUserEmail(email);
 
-        // Assert
         assertNotNull(result);
         assertEquals(2, result.size());
-        
-        // First notification (with article)
+
         assertEquals("Test Article Title", result.get(0).title());
         assertEquals("https://example.com/article1", result.get(0).url());
-        
-        // Second notification (deleted article)
+
         assertEquals("(article deleted)", result.get(1).title());
         assertEquals("", result.get(1).url());
 
@@ -203,11 +187,9 @@ class NotificationServiceImplTest {
 
     @Test
     void testFindByUserEmail_WithNullEmail() {
-        // Arrange
         String email = null;
         when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
-        // Act & Assert
         RuntimeException exception = assertThrows(RuntimeException.class, () ->
             notificationService.findByUserEmail(email)
         );
@@ -219,11 +201,9 @@ class NotificationServiceImplTest {
 
     @Test
     void testFindByUserEmail_WithEmptyEmail() {
-        // Arrange
         String email = "";
         when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
-        // Act & Assert
         RuntimeException exception = assertThrows(RuntimeException.class, () ->
             notificationService.findByUserEmail(email)
         );
